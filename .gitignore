@@ -1,0 +1,57 @@
+# ===== Unity (generado / local) =====
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]serSettings/
+/[Mm]emoryCaptures/
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vscode/
+.vs/
+.idea/
+crashlytics-buildid.txt
+sysinfo.txt
+
+# ===== Assets: solo se versiona lo propio del equipo =====
+# Los paquetes de terceros (11 GB de texturas, modelos y demos) quedan fuera del repositorio:
+# se descargan de la Asset Store / Sketchfab y no se pueden redistribuir.
+/Assets/*
+!/Assets/Scripts/
+!/Assets/Scripts.meta
+!/Assets/Editor/
+!/Assets/Editor.meta
+!/Assets/RE4/
+!/Assets/RE4.meta
+!/Assets/_DeadEcho/
+!/Assets/_DeadEcho.meta
+!/Assets/TextMesh Pro/
+!/Assets/TextMesh Pro.meta
+!/Assets/Scenes/
+!/Assets/Scenes.meta
+# de Scenes solo las escenas del juego (no los datos de iluminacion de las demos)
+/Assets/Scenes/*
+!/Assets/Scenes/SampleScene.unity
+!/Assets/Scenes/SampleScene.unity.meta
+!/Assets/Scenes/MainMenu.unity
+!/Assets/Scenes/MainMenu.unity.meta
+!/Assets/Scenes/Loading.unity
+!/Assets/Scenes/Loading.unity.meta
+
+# ===== Kit de interfaces =====
+# Las imagenes de referencia y el fondo provisional tienen derechos de autor (solo guia visual).
+/DeadEcho_UI_Kit/referencias/*.jpg
+/DeadEcho_UI_Kit/referencias/*.png
+/DeadEcho_UI_Kit/assets/
