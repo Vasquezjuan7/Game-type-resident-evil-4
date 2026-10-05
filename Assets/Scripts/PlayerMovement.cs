@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Gameplay
@@ -119,5 +119,9 @@ namespace Gameplay
             _verticalVelocity.y += Physics.gravity.y * Time.deltaTime;
             _controller.Move(_verticalVelocity * Time.deltaTime);
         }
+
+        /// <summary>Indica si el controlador está apoyado en el suelo y devuelve la velocidad base configurada.</summary>
+        public bool IsGrounded => _controller != null && _controller.isGrounded;
+        public float ConfiguredMoveSpeed => moveSpeed;
     }
 }
