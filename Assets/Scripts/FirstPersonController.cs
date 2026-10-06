@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Gameplay
@@ -304,6 +304,15 @@ namespace Gameplay
 
             float targetFov = TargetFovOverride > 1f ? TargetFovOverride : IsSprinting ? sprintFov : baseFov;
             _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, targetFov, Time.deltaTime * fovLerp);
+        }
+
+        /// <summary>Magnitud de la velocidad en el plano XZ y limpieza de retroceso acumulado.</summary>
+        public float PlanarSpeed => new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
+
+        public void ClearRecoil()
+        {
+            _recoilTarget = Vector2.zero;
+            _recoilCurrent = Vector2.zero;
         }
     }
 }
