@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using Gameplay.RE4;
@@ -266,6 +266,15 @@ namespace Gameplay
                 holder.localPosition = Vector3.Lerp(start, end, Mathf.SmoothStep(0f, 1f, t));
                 yield return null;
             }
+        }
+
+        /// <summary>Restaura la salud de Leon al máximo permitido si sigue con vida.</summary>
+        public bool IsCritical => !IsDead && Status == HealthStatus.Danger;
+
+        public void FullHeal()
+        {
+            if (IsDead) return;
+            currentHealth = maxHealth;
         }
     }
 }
