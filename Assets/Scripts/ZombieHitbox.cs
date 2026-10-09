@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Gameplay.RE4;
 
 namespace Gameplay
@@ -15,6 +15,9 @@ namespace Gameplay
         private void Awake()
         {
             if (health == null) health = GetComponentInParent<ZombieHealth>();
-        }
+        }
+
+        /// <summary>Indica si la zona de impacto corresponde a un punto crítico (cabeza).</summary>
+        public bool IsCriticalZone => part == BodyPart.Head;
     }
 }
