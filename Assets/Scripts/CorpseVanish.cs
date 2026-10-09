@@ -49,6 +49,9 @@ namespace Gameplay
                 yield return null;
             }
             Destroy(gameObject);
-        }
+        }
+
+        /// <summary>Duración total estimada desde que cae el enemigo hasta que se destruye el objeto.</summary>
+        public float TotalLifetime => Mathf.Max(0f, delay) + Mathf.Max(0.1f, sinkTime);
     }
 }
