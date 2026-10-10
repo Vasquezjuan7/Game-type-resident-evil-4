@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e471acfe33f6cc642a8d96ff29fca20d, type: 3}
+  m_Name: Herb_GR
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.ItemDefinition
+  id: herb_gr
+  displayName: Mezcla de hierbas (V+R)
+  description: Hierba verde y roja. Recupera toda la vida.
+  type: 3
+  size: {x: 1, y: 2}
+  maxStack: 1
+  tileColor: {r: 0.55, g: 0.35, b: 0.1, a: 1}
+  shortLabel: V+R
+  healPercent: 1
+  herb: 4
+  buyPrice: 0
+  sellPrice: 0
+  buyAmount: 1
+  documentText: 
+  weapon: {fileID: 0}
+  worldModel: {fileID: 691012714234613871, guid: 9187d20c62f6f9f49a4c355c2ccd1742, type: 3}
+  worldModelSize: 0.34

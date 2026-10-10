@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 536c0b01071170547a4388c3ace3f018, type: 3}
+  m_Name: Weapon_Shotgun
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.WeaponDefinition
+  id: shotgun
+  displayName: Escopeta W-870
+  weaponClass: 1
+  viewModelPrefab: {fileID: 5812354141389497160, guid: 7aabcd00fe36f144fa6031b0830a79f2, type: 3}
+  viewModelLength: 0.9
+  modelEulerOffset: {x: -0, y: 0, z: 0}
+  hipPosition: {x: 0.17, y: -0.17, z: 0.42}
+  aimPosition: {x: 0, y: -0.1, z: 0.36}
+  sprintEuler: {x: 18, y: -38, z: 12}
+  canonicalModel: 0
+  slidePart: 
+  magazinePart: 
+  slideTravel: 0.16
+  slideLocksOnEmpty: 1
+  cylinderPart: 
+  cylinderChambers: 6
+  useScopeOverlay: 0
+  damage: 19
+  pellets: 8
+  headMultiplier: 1.6
+  limbMultiplier: 0.7
+  staggerPower: 0.9
+  knockback: 1.2
+  penetration: 0
+  range: 35
+  explosionRadius: 0
+  projectileSpeed: 45
+  fireInterval: 0.95
+  automatic: 0
+  magazineSize: 6
+  reloadTime: 3.3
+  reloadOneByOne: 1
+  ammoItem: {fileID: 11400000, guid: f1a45194f45e24e4c930075088a98d99, type: 2}
+  hipSpread: 4
+  aimSpread: 2
+  aimFov: 58
+  aimTime: 0.18
+  recoilKickBack: 0.12
+  recoilPitch: 6
+  recoilYaw: 0.6
+  cameraPitchKick: 4
+  cycleAfterShot: 1
+  maxUpgradeLevel: 5
+  upgradeBaseCost: 4000
+  powerPerLevel: 0.15
+  ratePerLevel: 0.1
+  reloadPerLevel: 0.1
+  capacityPerLevel: 2
+  shotClips:
+  - {fileID: 8300000, guid: a42a25bfe713e63498febabb408fceea, type: 3}
+  - {fileID: 8300000, guid: b322a4e6a9f59b04a82a3336dde02871, type: 3}
+  - {fileID: 8300000, guid: ae2d2db46850b7c47ab85240cdc448f9, type: 3}
+  tailClips:
+  - {fileID: 8300000, guid: 5efe7e8da212005439ca38f9d1208e4d, type: 3}
+  - {fileID: 8300000, guid: 0f3516a8b2677cd46a4e35d0cabce703, type: 3}
+  equipClip: {fileID: 8300000, guid: 22eeebf8ebfe4fe41b78c2508d1f8ea8, type: 3}
+  aimClip: {fileID: 8300000, guid: 45c44be430237414b8194dd84cfad1d9, type: 3}
+  magOutClip: {fileID: 0}
+  magDrawClip: {fileID: 8300000, guid: d99d971ec0a16cb40a74f53191fb704b, type: 3}
+  magInClip: {fileID: 8300000, guid: 1e33cfc113bf1b945b17141369ca7953, type: 3}
+  rackClip: {fileID: 8300000, guid: a9ba81f40042d9a459cc55ed3001caa1, type: 3}
+  rackBackClip: {fileID: 8300000, guid: b36593ecec3d81d4a959516b91c8f25e, type: 3}
+  clipPitch: 1
+  shotPitch: 0.75
+  shotBody: 1.6
+  shotLength: 0.9
+  noiseRadius: 60

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e471acfe33f6cc642a8d96ff29fca20d, type: 3}
+  m_Name: Item_Shotgun
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.ItemDefinition
+  id: item_shotgun
+  displayName: Escopeta W-870
+  description: Escopeta de corredera. Devastadora a corta distancia y derriba grupos.
+  type: 0
+  size: {x: 7, y: 2}
+  maxStack: 1
+  tileColor: {r: 0.38, g: 0.26, b: 0.16, a: 1}
+  shortLabel: Escopeta W-870
+  healPercent: 0
+  herb: 0
+  buyPrice: 18000
+  sellPrice: 0
+  buyAmount: 1
+  documentText: 
+  weapon: {fileID: 11400000, guid: 3f82eba3c0c1eec419514374a1ed438d, type: 2}
+  worldModel: {fileID: 5812354141389497160, guid: 7aabcd00fe36f144fa6031b0830a79f2, type: 3}
+  worldModelSize: 0

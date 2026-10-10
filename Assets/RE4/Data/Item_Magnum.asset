@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e471acfe33f6cc642a8d96ff29fca20d, type: 3}
+  m_Name: Item_Magnum
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.ItemDefinition
+  id: item_magnum
+  displayName: "Rev\xF3lver Requiem"
+  description: "Rev\xF3lver Magnum. Seis balas que lo atraviesan todo. Ideal contra el Tyrant."
+  type: 0
+  size: {x: 4, y: 2}
+  maxStack: 1
+  tileColor: {r: 0.32, g: 0.3, b: 0.3, a: 1}
+  shortLabel: "Rev\xF3lver Requiem"
+  healPercent: 0
+  herb: 0
+  buyPrice: 35000
+  sellPrice: 0
+  buyAmount: 1
+  documentText: 
+  weapon: {fileID: 11400000, guid: 9c23a3d79784d9b4d856942e0c30d08e, type: 2}
+  worldModel: {fileID: 5593340850962843409, guid: cfe500f1cac98bd428c71db78ac4775f, type: 3}
+  worldModelSize: 0

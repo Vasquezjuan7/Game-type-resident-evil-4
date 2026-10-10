@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 536c0b01071170547a4388c3ace3f018, type: 3}
+  m_Name: Weapon_SMG
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.WeaponDefinition
+  id: smg
+  displayName: Subfusil TMP
+  weaponClass: 2
+  viewModelPrefab: {fileID: 829731926224797505, guid: 1cb6b34055c226143ad65d222728b2e8, type: 3}
+  viewModelLength: 0.6
+  modelEulerOffset: {x: -0, y: 180, z: 0}
+  hipPosition: {x: 0.16, y: -0.16, z: 0.36}
+  aimPosition: {x: 0, y: -0.095, z: 0.3}
+  sprintEuler: {x: 18, y: -38, z: 12}
+  canonicalModel: 0
+  slidePart: 
+  magazinePart: 
+  slideTravel: 0.16
+  slideLocksOnEmpty: 1
+  cylinderPart: 
+  cylinderChambers: 6
+  useScopeOverlay: 0
+  damage: 14
+  pellets: 1
+  headMultiplier: 2.2
+  limbMultiplier: 0.7
+  staggerPower: 0.15
+  knockback: 0.4
+  penetration: 0
+  range: 80
+  explosionRadius: 0
+  projectileSpeed: 45
+  fireInterval: 0.075
+  automatic: 1
+  magazineSize: 40
+  reloadTime: 1.9
+  reloadOneByOne: 0
+  ammoItem: {fileID: 11400000, guid: 2b74986ac1e4d0a4283bae1d3e08f23e, type: 2}
+  hipSpread: 4
+  aimSpread: 1.1
+  aimFov: 58
+  aimTime: 0.18
+  recoilKickBack: 0.03
+  recoilPitch: 1.1
+  recoilYaw: 0.8
+  cameraPitchKick: 0.45
+  cycleAfterShot: 0
+  maxUpgradeLevel: 5
+  upgradeBaseCost: 4000
+  powerPerLevel: 0.15
+  ratePerLevel: 0.1
+  reloadPerLevel: 0.1
+  capacityPerLevel: 2
+  shotClips:
+  - {fileID: 8300000, guid: 7a1788b10a259394b9019d21bef463ae, type: 3}
+  - {fileID: 8300000, guid: 4ae73664f9fa52f41b51a2e050901696, type: 3}
+  - {fileID: 8300000, guid: ada2ae050ed4f114eba3fab31db4313e, type: 3}
+  tailClips:
+  - {fileID: 8300000, guid: a9195d3b8dbaef940af4175ce12d10e3, type: 3}
+  - {fileID: 8300000, guid: 699f3c622cf808749ad5090e05beb115, type: 3}
+  equipClip: {fileID: 8300000, guid: 43c1734fa36d1674caeee38cab0f249e, type: 3}
+  aimClip: {fileID: 8300000, guid: 065b2c049ac04af40af4bfc9c56a671b, type: 3}
+  magOutClip: {fileID: 8300000, guid: 08edb2bef8ffb1f4a8de1858af2f36fb, type: 3}
+  magDrawClip: {fileID: 8300000, guid: ab3d477e689b7c640a37efec61f5a150, type: 3}
+  magInClip: {fileID: 8300000, guid: 84b8dc5699eea984d91a0a8e96178771, type: 3}
+  rackClip: {fileID: 8300000, guid: d80439cbec359c2429722491566cc218, type: 3}
+  rackBackClip: {fileID: 0}
+  clipPitch: 1.22
+  shotPitch: 1.35
+  shotBody: 0.55
+  shotLength: 0.35
+  noiseRadius: 45

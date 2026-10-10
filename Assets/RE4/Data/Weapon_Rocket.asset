@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 536c0b01071170547a4388c3ace3f018, type: 3}
+  m_Name: Weapon_Rocket
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.WeaponDefinition
+  id: rocket
+  displayName: Lanzacohetes
+  weaponClass: 4
+  viewModelPrefab: {fileID: 6915280084025867895, guid: 085dc141d3fa6144aa9492484a456dc4, type: 3}
+  viewModelLength: 1
+  modelEulerOffset: {x: 0, y: 0, z: 0}
+  hipPosition: {x: 0.2, y: -0.12, z: 0.3}
+  aimPosition: {x: 0.08, y: -0.09, z: 0.25}
+  sprintEuler: {x: 18, y: -38, z: 12}
+  canonicalModel: 1
+  slidePart: 
+  magazinePart: 
+  slideTravel: 0.16
+  slideLocksOnEmpty: 1
+  cylinderPart: 
+  cylinderChambers: 6
+  useScopeOverlay: 0
+  damage: 900
+  pellets: 1
+  headMultiplier: 3
+  limbMultiplier: 0.7
+  staggerPower: 0.5
+  knockback: 0.4
+  penetration: 0
+  range: 80
+  explosionRadius: 6
+  projectileSpeed: 40
+  fireInterval: 1.5
+  automatic: 0
+  magazineSize: 1
+  reloadTime: 3
+  reloadOneByOne: 0
+  ammoItem: {fileID: 11400000, guid: b34c773c87f812a429e4f7d8e9045661, type: 2}
+  hipSpread: 2
+  aimSpread: 0.4
+  aimFov: 50
+  aimTime: 0.18
+  recoilKickBack: 0.2
+  recoilPitch: 8
+  recoilYaw: 0.6
+  cameraPitchKick: 6
+  cycleAfterShot: 0
+  maxUpgradeLevel: 5
+  upgradeBaseCost: 4000
+  powerPerLevel: 0.15
+  ratePerLevel: 0.1
+  reloadPerLevel: 0.1
+  capacityPerLevel: 2
+  shotClips:
+  - {fileID: 8300000, guid: a98537918d51770428f1314034a17112, type: 3}
+  tailClips:
+  - {fileID: 8300000, guid: a9195d3b8dbaef940af4175ce12d10e3, type: 3}
+  - {fileID: 8300000, guid: 699f3c622cf808749ad5090e05beb115, type: 3}
+  equipClip: {fileID: 8300000, guid: d0b14abf562284a408a90d207c988ce6, type: 3}
+  aimClip: {fileID: 0}
+  magOutClip: {fileID: 0}
+  magDrawClip: {fileID: 0}
+  magInClip: {fileID: 8300000, guid: 16e30dc43355cf740bc197145fefdff0, type: 3}
+  rackClip: {fileID: 8300000, guid: cdae3b170ecf26e4fa1e9a6e4dec6195, type: 3}
+  rackBackClip: {fileID: 8300000, guid: dc159cd35eef8f34ca16c2a347948b91, type: 3}
+  clipPitch: 0.85
+  shotPitch: 0.6
+  shotBody: 2
+  shotLength: 1.5
+  noiseRadius: 90

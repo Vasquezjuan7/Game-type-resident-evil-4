@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e471acfe33f6cc642a8d96ff29fca20d, type: 3}
+  m_Name: Item_Pistol
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.ItemDefinition
+  id: item_pistol
+  displayName: Pistola 92F
+  description: "Pistola semiautom\xE1tica 92F. Cargador grande y buena cadencia."
+  type: 0
+  size: {x: 3, y: 2}
+  maxStack: 1
+  tileColor: {r: 0.3, g: 0.3, b: 0.33, a: 1}
+  shortLabel: Pistola 92F
+  healPercent: 0
+  herb: 0
+  buyPrice: 0
+  sellPrice: 0
+  buyAmount: 1
+  documentText: 
+  weapon: {fileID: 11400000, guid: ee93fb4dcc5b70441ba63f3ba972e1c7, type: 2}
+  worldModel: {fileID: 4613539341814969857, guid: 81eafb64697f2504dafb56a96d585043, type: 3}
+  worldModelSize: 0
