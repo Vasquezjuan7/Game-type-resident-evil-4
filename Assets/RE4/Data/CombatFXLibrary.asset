@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53f283de1227e2d4c8d10f0ace926ec9, type: 3}
+  m_Name: CombatFXLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.CombatFXLibrary
+  muzzleFlash: {fileID: 2100000, guid: ce0190880e3285c4686dd3f9e591c818, type: 2}
+  tracer: {fileID: 2100000, guid: a9beb3ac8b68a3743b71cc4eed7a7e2d, type: 2}
+  laser: {fileID: 2100000, guid: b8cdee7be1a515f4bbb60211d5a29819, type: 2}
+  laserDot: {fileID: 2100000, guid: 9ed2cfa990d633e4f92cf3b135e52b8a, type: 2}
+  blood: {fileID: 2100000, guid: efddad5eed00f3640bfff3f765754fa8, type: 2}
+  bloodDecal: {fileID: 2100000, guid: dbf2abf0acba3af468936d34760f284f, type: 2}
+  dust: {fileID: 2100000, guid: 72e37660b447b8e4191853f849c642b1, type: 2}
+  spark: {fileID: 2100000, guid: bb0da20904e2562459131486ee5db41f, type: 2}
+  shellCasing: {fileID: 2100000, guid: 34dfdaf20086bce42b43d2d59774b651, type: 2}
+  smoke: {fileID: 2100000, guid: 88114a246d95dff40875bbfbeef8cda3, type: 2}
+  fire: {fileID: 2100000, guid: 7ec2056b009e43c44a02984ef09360f4, type: 2}
+  knife: {fileID: 2100000, guid: 8dc20bafdcd30984d8b246a91dc79a3c, type: 2}
+  itemGlint: {fileID: 2100000, guid: 19cad1bfabc32e4439704c79d86da70c, type: 2}
+  sounds: {fileID: 11400000, guid: 2507db1f4ebae5144ac1f30ae866949a, type: 2}
