@@ -157,6 +157,9 @@ namespace Gameplay
             BoxCollider bc = go.AddComponent<BoxCollider>();
             bc.size = size;
             Register(go, part, bc);
-        }
+        }
+
+        /// <summary>Comprueba si una cantidad de daño sería suficiente para abatir al enemigo.</summary>
+        public bool WouldKill(float damageAmount) => !isDead && damageAmount >= currentHealth;
     }
 }
