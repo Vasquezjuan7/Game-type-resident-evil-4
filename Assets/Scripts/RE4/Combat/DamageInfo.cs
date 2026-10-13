@@ -68,6 +68,9 @@ namespace Gameplay.RE4
                 mask &= ~(1 << 2); // Ignore Raycast
                 return mask;
             }
-        }
+        }
+
+        /// <summary>Indica si todas las capas personalizadas del sistema RE4 existen en el proyecto.</summary>
+        public static bool AreLayersConfigured => Weapon >= 0 && Hitbox >= 0 && EnemyBody >= 0;
     }
 }
