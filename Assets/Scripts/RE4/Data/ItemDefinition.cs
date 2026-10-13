@@ -66,6 +66,11 @@ namespace Gameplay.RE4
         [Tooltip("Tamano maximo del modelo en el mundo (metros). 0 = tamano original.")]
         public float worldModelSize = 0f;
 
-        public bool IsStackable => maxStack > 1;
+        public bool IsStackable => maxStack > 1;
+
+        /// <summary>Consultas rápidas sobre el uso y comercio del objeto en el inventario.</summary>
+        public bool CanBeSold => sellPrice > 0 && type != ItemType.Key && type != ItemType.Money;
+        public bool IsHealingItem => type == ItemType.Heal || type == ItemType.Herb;
+        public int CellArea => Mathf.Max(1, size.x * size.y);
     }
 }
