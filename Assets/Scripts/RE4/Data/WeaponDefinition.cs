@@ -119,6 +119,10 @@ namespace Gameplay.RE4
         public float shotPitch = 1f;
         public float shotBody = 1f;
         public float shotLength = 0.5f;
-        public float noiseRadius = 45f;
+        public float noiseRadius = 45f;
+
+        /// <summary>Daño total por disparo (incluyendo perdigones) y daño teórico por segundo en nivel base.</summary>
+        public float TotalShotDamage => damage * Mathf.Max(1, pellets);
+        public float BaseDps => TotalShotDamage / Mathf.Max(0.05f, fireInterval);
     }
 }
