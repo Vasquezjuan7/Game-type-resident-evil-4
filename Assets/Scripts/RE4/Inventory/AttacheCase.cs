@@ -335,6 +335,24 @@ namespace Gameplay.RE4
             entries.Add(entry);
             NotifyChanged();
             return true;
+        }
+
+        /// <summary>Calcula cuántas celdas de la cuadrícula están ocupadas y el espacio libre disponible.</summary>
+        public int TotalCells => Mathf.Max(1, width * height);
+
+        public int OccupiedCells
+        {
+            get
+            {
+                int used = 0;
+                foreach (var e in entries)
+                {
+                    if (e != null && e.item != null) used += e.Size.x * e.Size.y;
+                }
+                return Mathf.Min(TotalCells, used);
+            }
         }
+
+        public int FreeCells => Mathf.Max(0, TotalCells - OccupiedCells);
     }
 }
