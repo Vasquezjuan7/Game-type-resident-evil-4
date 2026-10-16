@@ -244,6 +244,9 @@ namespace Gameplay.RE4
             g.transform.localScale = scale;
             Renderer r = g.GetComponent<Renderer>();
             r.material.color = color;
-        }
+        }
+
+        /// <summary>Segundos restantes antes de que el botín temporal desaparezca del escenario.</summary>
+        public float RemainingLifetime => despawns ? Mathf.Max(0f, despawnTime - (Time.time - _spawnTime)) : float.PositiveInfinity;
     }
 }
