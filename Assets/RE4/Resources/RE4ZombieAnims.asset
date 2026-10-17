@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fefa463f2f9377c40b6d3d45c19d4d85, type: 3}
+  m_Name: RE4ZombieAnims
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.ZombieAnimLibrary
+  idles:
+  - {fileID: -203655887218126122, guid: 2964b4d7254a01e4283addf347376adf, type: 3}
+  - {fileID: -203655887218126122, guid: b6517663616ef4d449ef9ef1507095a9, type: 3}
+  - {fileID: -203655887218126122, guid: 584127dd12808074396036f0b56c5f53, type: 3}
+  - {fileID: -203655887218126122, guid: c64c4ac49ca9e9440afe77d300160871, type: 3}
+  - {fileID: -203655887218126122, guid: ca04923cab193c34d97f2dc18a7eb0cb, type: 3}
+  walks:
+  - {fileID: -203655887218126122, guid: 4f8a2b504b559c24fa731358f107feb8, type: 3}
+  - {fileID: -203655887218126122, guid: ebd5293fe0b16f742b2cd391906ead4e, type: 3}
+  - {fileID: -203655887218126122, guid: 4a1d7b7c0230e3c4bb68c3c4e4c4a7a8, type: 3}
+  runs:
+  - {fileID: -203655887218126122, guid: b58daf8fc0744e24d9eb0c83ba766aa2, type: 3}
+  attacks:
+  - {fileID: -203655887218126122, guid: b7599355f8abc0245be31ba905ed7d1f, type: 3}
+  - {fileID: -203655887218126122, guid: f7bc40f843b8d4f47a6ad89c7328059e, type: 3}
+  - {fileID: -203655887218126122, guid: 12a5548ae0da47e45ac8ddb110df80b5, type: 3}
+  - {fileID: -203655887218126122, guid: 7bec303bedb341843b7a99009d82b442, type: 3}
+  - {fileID: -203655887218126122, guid: d9392c7cd47e0da49a86feb902d37592, type: 3}
+  - {fileID: -203655887218126122, guid: 8c832928027e131458dee34d694eee68, type: 3}
+  hits:
+  - {fileID: -203655887218126122, guid: f97b62d593022c142865dc437b7d2e06, type: 3}
+  - {fileID: -203655887218126122, guid: 799e3d996ad057240be6991585d1692f, type: 3}
+  screams:
+  - {fileID: -203655887218126122, guid: 3d97b569d869cc64eb8c7f948fa3640d, type: 3}
+  standUps:
+  - {fileID: -203655887218126122, guid: 33c40b6baeab476469ff24c40e5580d6, type: 3}
+  - {fileID: -203655887218126122, guid: 02f669dc989400040803e407491df826, type: 3}
+  - {fileID: -203655887218126122, guid: 80fb6d43d9115c249aac90e42377b273, type: 3}
