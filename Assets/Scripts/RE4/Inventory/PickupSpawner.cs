@@ -18,6 +18,9 @@ namespace Gameplay.RE4
         {
             Gizmos.color = item != null ? item.tileColor : Color.yellow;
             Gizmos.DrawWireCube(transform.position + Vector3.up * 0.1f, Vector3.one * 0.25f);
-        }
+        }
+
+        /// <summary>Indica si el punto de aparición tiene un objeto válido y cantidad positiva asignada.</summary>
+        public bool IsConfigured => item != null && count > 0;
     }
 }
