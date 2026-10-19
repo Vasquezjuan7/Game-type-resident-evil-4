@@ -97,6 +97,9 @@ namespace Gameplay.RE4
             {
                 FocusedNpc.Talk(gameObject);
             }
-        }
+        }
+
+        /// <summary>Devuelve true si el jugador tiene algún objeto, mercader o NPC enfocado para interactuar.</summary>
+        public bool HasTarget => Focused != null || FocusedMerchant != null || FocusedNpc != null;
     }
 }
