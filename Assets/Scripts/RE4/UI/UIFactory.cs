@@ -136,6 +136,15 @@ namespace Gameplay.RE4
             tex.SetPixels(px);
             tex.Apply();
             return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+        }
+
+        /// <summary>Crea un panel con borde configurado en una sola llamada.</summary>
+        public static Image FramedPanel(Transform parent, string name, Color bgColor, Color borderColor,
+            Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 pos, Vector2 size, float borderWidth = 2f)
+        {
+            Image panel = Panel(parent, name, bgColor, anchorMin, anchorMax, pivot, pos, size);
+            AddOutline(panel, borderColor, borderWidth);
+            return panel;
         }
     }
 }
