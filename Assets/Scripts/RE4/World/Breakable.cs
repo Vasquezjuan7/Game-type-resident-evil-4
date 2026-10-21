@@ -87,6 +87,9 @@ namespace Gameplay.RE4
                 Vector3 d = br.transform.position - point;
                 if (d.magnitude <= radius) br.Break(d);
             }
-        }
+        }
+
+        /// <summary>Indica si la caja o barril ya fue destruido.</summary>
+        public bool IsBroken => _broken;
     }
 }
