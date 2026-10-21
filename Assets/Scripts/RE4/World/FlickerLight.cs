@@ -23,6 +23,12 @@ namespace Gameplay.RE4
         {
             float n = Mathf.PerlinNoise(_seed, Time.time * speed) - 0.5f;
             _light.intensity = baseIntensity * (1f + n * amount * 2f);
+        }
+
+        /// <summary>Permite actualizar la intensidad base de la antorcha u hoguera en tiempo de ejecución.</summary>
+        public void SetBaseIntensity(float newIntensity)
+        {
+            baseIntensity = Mathf.Max(0f, newIntensity);
         }
     }
 }
