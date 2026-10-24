@@ -94,6 +94,9 @@ namespace Gameplay.RE4
                 if (c != null) _breath.PlayOneShot(c, hurt ? 0.5f : 0.35f);
                 _nextBreath = Time.time + (c != null ? c.length : 1f) + Random.Range(0.1f, 0.5f);
             }
-        }
+        }
+
+        /// <summary>Indica si Leon lleva corriendo suficiente tiempo como para activar la respiración de cansancio.</summary>
+        public bool IsOutOfBreath => _sprintTime > 4f;
     }
 }
