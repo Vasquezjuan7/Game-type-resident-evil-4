@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e471acfe33f6cc642a8d96ff29fca20d, type: 3}
+  m_Name: Doc_DiarioAldeano
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.ItemDefinition
+  id: doc_diario
+  displayName: Diario de un aldeano
+  description: Documento
+  type: 8
+  size: {x: 1, y: 1}
+  maxStack: 1
+  tileColor: {r: 0.85, g: 0.8, b: 0.65, a: 1}
+  shortLabel: Doc
+  healPercent: 0
+  herb: 0
+  buyPrice: 0
+  sellPrice: 0
+  buyAmount: 1
+  documentText: "14 de octubre\nDesde que el Padre lleg\xF3 al pueblo ya nadie va a misa. Dicen que ahora rezan en la cantera, de noche, y que vuelven cantando.\n\n17 de octubre\nMi mujer volvi\xF3 de la reuni\xF3n con los ojos rojos. No me habla. Tose sangre y se r\xEDe sola.\n\n19 de octubre\nMe han dado de beber el agua \xABbendita\xBB del pozo. Me arde la nuca. Oigo una voz que no es la m\xEDa y me dice que espere al forastero.\n\nSi alguien lee esto: no beb\xE1is del pozo."
+  weapon: {fileID: 0}
+  worldModel: {fileID: 0}
+  worldModelSize: 0
