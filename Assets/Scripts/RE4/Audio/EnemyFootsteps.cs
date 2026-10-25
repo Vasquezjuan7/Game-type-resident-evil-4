@@ -42,6 +42,9 @@ namespace Gameplay.RE4
             if (clip == null) return;
             _src.pitch = pitch * Random.Range(0.9f, 1.1f);
             _src.PlayOneShot(clip, volume * Mathf.Clamp(speed / 3f, 0.5f, 1.2f));
-        }
+        }
+
+        /// <summary>Comprueba si el agente se está desplazando con velocidad suficiente para emitir pasos.</summary>
+        public bool IsMoving => _agent != null && _agent.enabled && new Vector3(_agent.velocity.x, 0f, _agent.velocity.z).sqrMagnitude >= 0.04f;
     }
 }
