@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e471acfe33f6cc642a8d96ff29fca20d, type: 3}
+  m_Name: Res_Polvora
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.RE4.ItemDefinition
+  id: polvora
+  displayName: "P\xF3lvora"
+  description: "Material b\xE1sico para fabricar munici\xF3n en el malet\xEDn (tecla C)."
+  type: 7
+  size: {x: 1, y: 1}
+  maxStack: 30
+  tileColor: {r: 0.25, g: 0.25, b: 0.28, a: 1}
+  shortLabel: "P\xF3lvora"
+  healPercent: 0
+  herb: 0
+  buyPrice: 0
+  sellPrice: 0
+  buyAmount: 1
+  documentText: 
+  weapon: {fileID: 0}
+  worldModel: {fileID: 0}
+  worldModelSize: 0
