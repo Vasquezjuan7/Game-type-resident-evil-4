@@ -96,6 +96,13 @@ namespace Gameplay.RE4
                 case UpgradeStat.ReloadSpeed: return $"{ReloadTime(w, level):0.00} s";
                 default: return $"{MagazineSize(w, level)} balas";
             }
+        }
+
+        /// <summary>Suma total de niveles de mejora aplicados sobre un arma.</summary>
+        public static int TotalUpgradeLevels(CaseEntry e)
+        {
+            if (e == null || e.upgrades == null) return 0;
+            return e.upgrades.power + e.upgrades.fireRate + e.upgrades.reloadSpeed + e.upgrades.capacity;
         }
     }
 }
