@@ -542,6 +542,9 @@ namespace Gameplay
         {
             if (bone == null || !_bind.TryGetValue(bone, out Quaternion b)) return;
             bone.localRotation = b * Quaternion.Euler(x, y, z);
-        }
+        }
+
+        /// <summary>Indica si el perro zombi ya descubrió al jugador y está en combate activo.</summary>
+        public bool IsAggressive => !IsDead && State != DogState.Idle;
     }
 }
