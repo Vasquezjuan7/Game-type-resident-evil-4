@@ -113,6 +113,14 @@ namespace Gameplay.RE4
             g.transform.localRotation = Quaternion.Euler(euler);
             g.GetComponent<Renderer>().material.color = color;
             return g;
+        }
+
+        /// <summary>Calcula la distancia horizontal en el plano XZ hasta la posición indicada.</summary>
+        public float PlanarDistanceTo(Vector3 pos)
+        {
+            Vector3 d = transform.position - pos;
+            d.y = 0f;
+            return d.magnitude;
         }
     }
 }
