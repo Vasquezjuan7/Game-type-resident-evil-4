@@ -108,6 +108,10 @@ namespace Gameplay.RE4
             }
 
             Destroy(gameObject);
-        }
+        }
+
+        /// <summary>Indica si el cohete sigue activo en vuelo y devuelve el tiempo restante antes de detonar.</summary>
+        public bool IsInFlight => !_exploded && _life > 0f;
+        public float RemainingFlightTime => Mathf.Max(0f, _life);
     }
 }
