@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bd0626c07aa9d64a9cda97710e2dc6a, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier: Assembly-CSharp::DeadEcho.UI.UITheme
+  negroFondo: {r: 0.043137256, g: 0.043137256, b: 0.043137256, a: 1}
+  hueso: {r: 0.9254902, g: 0.9098039, b: 0.87058824, a: 1}
+  huesoClaro: {r: 0.9019608, g: 0.9019608, b: 0.8862745, a: 1}
+  grisMedio: {r: 0.6039216, g: 0.5882353, b: 0.5529412, a: 1}
+  grisLinea: {r: 0.18039216, g: 0.18039216, b: 0.17254902, a: 1}
+  seccionA: {r: 0.17254902, g: 0.17254902, b: 0.16862746, a: 1}
+  seccionB: {r: 0.22745098, g: 0.22745098, b: 0.21960784, a: 1}
+  verdeOk: {r: 0.7254902, g: 0.89411765, b: 0.6901961, a: 1}
+  fuego: {r: 1, g: 0.47843137, b: 0.11764706, a: 1}
+  specialElite: {fileID: 11400000, guid: dbf3c56ba28399847a49c90d57ff46ef, type: 2}
+  courierPrime: {fileID: 11400000, guid: 8be25239ff121f1439b48f538df169af, type: 2}
+  courierPrimeBold: {fileID: 11400000, guid: 8105bdd226046b44199298f7b42918be, type: 2}
+  rajdhaniMedium: {fileID: 11400000, guid: 4eaea42b8029d7141aee20fcd9b09638, type: 2}
+  rajdhaniSemiBold: {fileID: 11400000, guid: 4f55ef7b970fac14faa0661d4e0fe15b, type: 2}
+  oswaldBold: {fileID: 11400000, guid: f1f9554f4867763439e789440b849dca, type: 2}
+  tituloPantalla: 54
+  opcionMenu: 30
+  filaSistema: 28
+  textoNormal: 24
+  textoPequeno: 20
+  alturaFila: 70
+  tiempoSeleccion: 0.15
+  tiempoPantalla: 0.25
+  blanco: {fileID: 21300000, guid: fa0621c3c62ce1b42a9dd678720d09f3, type: 3}
+  vidrio: {fileID: 21300000, guid: 104dacaae96f0374cbac3a4d9420b8cc, type: 3}
+  tinta: {fileID: 21300000, guid: 35268239adfa2ba428347b2524a1b097, type: 3}
+  pincelBlanco: {fileID: 21300000, guid: 5347cb322957fcf4d8032d984f64c683, type: 3}
+  trapecio: {fileID: 21300000, guid: 016c1de0780918a49bfe166b93f3b1b0, type: 3}
+  aro: {fileID: 21300000, guid: 194298e3f88bfbf4582fb2742b4f03e2, type: 3}
+  rombo: {fileID: 21300000, guid: b7489be7fd97e9e4f89d5fcb596f1fbe, type: 3}
+  enter: {fileID: 21300000, guid: 62d3f87b204d6d04ba9bb4c5aa497dd4, type: 3}
+  flechaIzq: {fileID: 0}
+  flechaDer: {fileID: 0}
+  degradadoIzq: {fileID: 21300000, guid: 83c3d6107350a2042a0ec85f49e5a46d, type: 3}
+  vineta: {fileID: 21300000, guid: 4fdaead678d10a1448b49c2c8a21ac69, type: 3}
+  grano: {fileID: 2800000, guid: b6114b377c93e4f44b8a6182986b3fc2, type: 3}
