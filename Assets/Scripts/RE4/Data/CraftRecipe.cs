@@ -43,6 +43,19 @@ namespace Gameplay.RE4
                 return "<color=#ff7060>No hay sitio en el maletín.</color>";
             }
             return $"<color=#9fe8a0>Fabricado: {result.displayName} x{resultCount}</color>";
+        }
+
+        /// <summary>Calcula cuántas veces seguidas se puede fabricar esta receta con los materiales actuales.</summary>
+        public int MaxCraftableBatches(AttacheCase c)
+        {
+            if (result == null || ingredientA == null || c == null || countA <= 0) return 0;
+            int batchesA = c.CountItem(ingredientA) / countA;
+            if (ingredientB != null && countB > 0)
+            {
+                int batchesB = c.CountItem(ingredientB) / countB;
+                return Mathf.Min(batchesA, batchesB);
+            }
+            return batchesA;
         }
     }
 }
