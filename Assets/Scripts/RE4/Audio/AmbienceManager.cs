@@ -65,6 +65,9 @@ namespace Gameplay.RE4
             _shot.transform.position = cam.transform.position + new Vector3(r.x, Random.Range(0f, 5f), r.y);
             _shot.pitch = Random.Range(0.85f, 1.1f);
             _shot.PlayOneShot(c, Random.Range(0.35f, 0.7f));
-        }
+        }
+
+        /// <summary>Nivel normalizado (0..1) del zumbido ambiental de tensión durante el asedio.</summary>
+        public float TensionLevel => _droneLevel;
     }
 }
