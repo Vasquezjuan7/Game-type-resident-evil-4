@@ -54,6 +54,15 @@ namespace Gameplay.RE4
             bool danger = PlayerHealth.Instance != null && PlayerHealth.Instance.Status == HealthStatus.Danger;
             float flicker = danger && Mathf.PerlinNoise(Time.time * 9f, 0.3f) > 0.78f ? 0.25f : 1f;
             _light.intensity = intensity * flicker;
+        }
+
+        /// <summary>Permite consultar o cambiar por código el estado de la linterna de Leon.</summary>
+        public bool IsOn => _on;
+
+        public void SetFlashlight(bool state)
+        {
+            _on = state;
+            if (_light != null) _light.enabled = _on;
         }
     }
 }
