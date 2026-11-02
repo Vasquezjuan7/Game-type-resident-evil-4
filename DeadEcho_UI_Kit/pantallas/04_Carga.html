@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dead Echo · Carga</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&amp;family=Oswald:wght@700&amp;family=Rajdhani:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes dl-push{from{transform:scale(1.01)}to{transform:scale(1.07) translate(-10px,0)}}
+.dl-bg{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:60% 70%;animation:dl-push 40s ease-in-out infinite alternate}
+@keyframes dl-cloud{from{transform:translateX(-120px)}to{transform:translateX(120px)}}
+.dl-cloud{position:absolute;border-radius:50%;filter:blur(40px);animation:dl-cloud 34s ease-in-out infinite alternate}
+@keyframes dl-fog{from{transform:translateX(140px)}to{transform:translateX(-140px)}}
+.dl-fog{position:absolute;border-radius:50%;background:#e8e8e5;filter:blur(30px);animation:dl-fog 26s ease-in-out infinite alternate}
+@keyframes dl-ash{0%{transform:translate(0,-20px);opacity:0}10%{opacity:.8}100%{transform:translate(-80px,760px);opacity:0}}
+.dl-ash{position:absolute;top:0;width:3px;height:3px;border-radius:50%;background:#5a5a57;animation:dl-ash 12s linear infinite}
+@keyframes dl-spin{to{transform:rotate(360deg)}}
+.dl-spin{animation:dl-spin 1.4s linear infinite;transform-origin:50% 50%}
+@media (prefers-reduced-motion:reduce){.dl-bg,.dl-cloud,.dl-fog,.dl-ash,.dl-spin{animation:none}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; position: relative; overflow: hidden; background: #d4d4d1">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs>
+    <filter id="dl-rough"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="7"></feTurbulence><feDisplacementMap in="SourceGraphic" scale="4"></feDisplacementMap></filter>
+    <filter id="dl-eaten"><feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="3" result="n"></feTurbulence><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.2 1.25" result="m"></feColorMatrix><feComposite in="SourceGraphic" in2="m" operator="in"></feComposite></filter>
+  </defs></svg>
+  <img class="dl-bg" src="../assets/fondo_carga_sin_logo.png" alt="" aria-hidden="true" style="filter: grayscale(1) contrast(1.05)">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 300px; background: linear-gradient(180deg, rgba(200,200,196,.55) 0%, rgba(200,200,196,0) 100%)"></div>
+  <div class="dl-cloud" aria-hidden="true" style="left: -100px; top: -40px; width: 700px; height: 160px; background: #6c6c69; opacity: .55"></div>
+  <div class="dl-cloud" aria-hidden="true" style="left: 700px; top: -60px; width: 760px; height: 190px; background: #5c5c59; opacity: .6; animation-direction: alternate-reverse"></div>
+  <div class="dl-cloud" aria-hidden="true" style="left: 300px; top: 180px; width: 600px; height: 90px; background: #f3f3f0; opacity: .6"></div>
+  <div class="dl-fog" aria-hidden="true" style="left: -200px; top: 520px; width: 900px; height: 120px; opacity: .45"></div>
+  <div class="dl-fog" aria-hidden="true" style="left: 600px; top: 470px; width: 800px; height: 110px; opacity: .35; animation-duration: 32s"></div>
+  <div aria-hidden="true">
+    <span class="dl-ash" style="left: 200px"></span><span class="dl-ash" style="left: 420px; animation-delay: -2s; width: 2px; height: 2px"></span><span class="dl-ash" style="left: 640px; animation-delay: -5s"></span><span class="dl-ash" style="left: 860px; animation-delay: -7s; width: 2px; height: 2px"></span><span class="dl-ash" style="left: 1080px; animation-delay: -9s"></span><span class="dl-ash" style="left: 330px; animation-delay: -10s"></span><span class="dl-ash" style="left: 980px; animation-delay: -1s"></span>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(ellipse 90% 85% at 50% 45%, rgba(0,0,0,0) 60%, rgba(0,0,0,.4) 100%)"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 58px; display: flex; flex-direction: column; align-items: center">
+    <h1 style="margin: 0; font: 700 88px/1 'Oswald', sans-serif; letter-spacing: 0.05em; color: #141413; filter: url(#dl-eaten)">DEAD</h1>
+    <div style="margin-top: 6px; display: flex; align-items: center; gap: 10px">
+      <span aria-hidden="true" style="width: 2px; height: 32px; background: #141413"></span>
+      <span style="font: 400 32px 'Special Elite', monospace; letter-spacing: 0.36em; color: #141413; filter: url(#dl-rough)">echo</span>
+      <span aria-hidden="true" style="width: 2px; height: 32px; background: #141413"></span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 64px; right: 64px; bottom: 34px; display: flex; justify-content: space-between; align-items: flex-end">
+    <div style="max-width: 560px; font: 500 18px 'Rajdhani', sans-serif; color: #f2f2ee; text-shadow: 0 1px 6px rgba(0,0,0,.9)">
+      <p style="margin: 0 0 4px; font-size: 13px; letter-spacing: 0.3em; color: #d6d6d2">CONSEJO</p>
+      <p style="margin: 0">El ruido atrae a los infectados. Camina agachado cerca de las puertas cerradas.</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; font: 600 15px 'Rajdhani', sans-serif; letter-spacing: 0.2em; color: #f2f2ee; text-shadow: 0 1px 6px rgba(0,0,0,.9)">CARGANDO
+      <svg class="dl-spin" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="12" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"></circle><path d="M15 3 A12 12 0 0 1 27 15" fill="none" stroke="#fff" stroke-width="2"></path></svg>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

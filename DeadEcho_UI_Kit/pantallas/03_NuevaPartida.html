@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dead Echo · Nueva partida</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&amp;family=Special+Elite&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.dn-sec{position:relative;height:30px;display:flex;align-items:center;padding-left:8px;margin-top:14px;font:500 15px 'Rajdhani',sans-serif;color:#9d9d99;letter-spacing:.04em;isolation:isolate}
+.dn-sec::before{content:"";position:absolute;left:0;top:0;bottom:0;width:340px;background:linear-gradient(90deg,#2c2c2b,#3a3a38);clip-path:polygon(0 0,88% 0,100% 100%,0 100%);z-index:-1}
+.dn-row{all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:grid;grid-template-columns:200px 1fr;align-items:center;min-height:50px;padding:0 22px 0 26px;border-bottom:1px solid #2e2e2c;font:500 18px 'Rajdhani',sans-serif;color:#e6e6e2}
+.dn-row small{font:500 15px 'Rajdhani',sans-serif;color:#a5a5a0}
+.dn-row:hover{background:rgba(255,255,255,.05)}
+.dn-on{background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.05) 60%,rgba(255,255,255,.12));box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 -6px 14px -8px rgba(255,255,255,.8)}
+.dn-on small{color:#e6e6e2}
+.dn-slot{display:grid;grid-template-columns:88px 1fr auto;white-space:nowrap;align-items:center;gap:14px;min-height:56px;padding:0 18px;border-bottom:1px solid #2e2e2c;font:500 16px 'Rajdhani',sans-serif;color:#8d8d89}
+.dn-btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 26px;font:600 17px 'Rajdhani',sans-serif;letter-spacing:.06em;color:#e6e6e2;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.02))}
+.dn-btn:hover{background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.06))}
+.dn-main{background:linear-gradient(180deg,#e9e9e4,#a9a9a4);color:#111;box-shadow:0 0 16px rgba(255,255,255,.2)}
+@keyframes dn-scan{0%{top:0}100%{top:100%}}
+.dn-scan{animation:dn-scan 4s ease-in-out infinite alternate}
+@keyframes dn-dot{0%,100%{opacity:.3}50%{opacity:1}}
+.dn-dot{animation:dn-dot 1.2s ease-in-out infinite}
+@keyframes dn-toast{0%,8%{opacity:0;transform:translateY(10px)}14%,70%{opacity:1;transform:none}80%,100%{opacity:0;transform:none}}
+.dn-toast{animation:dn-toast 7s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.dn-scan,.dn-dot,.dn-toast{animation:none}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; position: relative; overflow: hidden; background: #0b0b0b; font-family: 'Rajdhani', sans-serif; color: #e6e6e2">
+  <h1 style="position: absolute; left: 64px; top: 22px; margin: 0; font: 600 28px 'Rajdhani', sans-serif; letter-spacing: 0.06em">NUEVA PARTIDA</h1>
+  <div aria-hidden="true" style="position: absolute; left: 64px; right: 64px; top: 66px; height: 1px; background: #3c3c3a"></div>
+
+  <div style="position: absolute; left: 64px; top: 78px; width: 640px">
+    <div class="dn-sec">Dificultad</div>
+    <button class="dn-row"><span>Narrativa</span><small>Para disfrutar la historia. Enemigos débiles, munición abundante.</small></button>
+    <button class="dn-row dn-on"><span>Superviviente</span><small>La experiencia recomendada. Recursos limitados.</small></button>
+    <button class="dn-row"><span>Pesadilla</span><small>Enemigos agresivos, sin autoguardado. Cada bala cuenta.</small></button>
+
+    <div class="dn-sec">Ranura de memoria <span style="margin-left: 10px; padding: 1px 8px; font: 700 11px 'Rajdhani'; letter-spacing: 0.2em; color: #111; background: #d8d8d3">DEMO</span></div>
+    <div class="dn-slot" style="color: #e6e6e2; background: rgba(255,255,255,.04)">
+      <span style="font: 600 13px 'Rajdhani'; letter-spacing: 0.15em; color: #9d9d99">RANURA 1</span>
+      <span style="display: flex; flex-direction: column; line-height: 1.15"><span style="font-weight: 600">Memoria falsa · Hospital San Aurelio</span><span style="font-size: 14px; color: #a5a5a0">Superviviente · 00:42:17 · 28/10/2026 21:14 · Caso 12%</span></span>
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="#e6e6e2"></path></svg>
+    </div>
+    <div class="dn-slot"><span style="font: 600 13px 'Rajdhani'; letter-spacing: 0.15em">RANURA 2</span><span>— Vacía —</span><span></span></div>
+    <div class="dn-slot"><span style="font: 600 13px 'Rajdhani'; letter-spacing: 0.15em">RANURA 3</span><span>— Vacía —</span><span></span></div>
+    <div style="display: flex; align-items: center; gap: 16px; margin-top: 16px">
+      <button class="dn-btn"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#e6e6e2" stroke-width="1.5"><path d="M3 2 H13 L16 5 V16 H3 Z"></path><path d="M6 2 V7 H12 V2 M6 16 V11 H12 V16"></path></svg>Guardar progreso</button>
+      <span style="font: 500 14px 'Rajdhani'; color: #8d8d89">Demo: solo asigna una memoria falsa, no guarda datos reales.</span>
+    </div>
+  </div>
+
+  <!-- protagonista -->
+  <aside style="position: absolute; left: 760px; top: 92px; width: 456px; height: 520px">
+    <div style="position: relative; height: 290px; overflow: hidden; background: radial-gradient(ellipse at 50% 35%, #3a3a38, #121211 75%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12)">
+      <svg aria-hidden="true" width="456" height="290" viewBox="0 0 456 290" style="position: absolute; inset: 0; filter: blur(.6px)"><circle cx="228" cy="96" r="42" fill="#0e0e0d"></circle><path d="M150 290 Q150 160 228 150 Q306 160 306 290 Z" fill="#0e0e0d"></path><path d="M196 70 Q228 40 262 72 L258 90 Q228 70 198 92 Z" fill="#1d1d1c"></path></svg>
+      <div class="dn-scan" aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 2px; background: rgba(255,255,255,.7); box-shadow: 0 0 14px rgba(255,255,255,.6)"></div>
+      <p style="position: absolute; left: 14px; bottom: 10px; margin: 0; font: 400 22px 'Special Elite', monospace">[PROTAGONISTA]</p>
+      <p style="position: absolute; right: 14px; bottom: 14px; margin: 0; font: 600 12px 'Rajdhani'; letter-spacing: 0.2em; color: #9d9d99">AGENTE DE CONTENCIÓN</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 14px; font: 500 16px 'Rajdhani', sans-serif">
+      <p style="grid-column: 1 / -1; margin: 0 0 6px; font-size: 13px; letter-spacing: 0.2em; color: #9d9d99">EQUIPO INICIAL</p>
+      <span style="padding: 6px 0; border-bottom: 1px solid #2e2e2c">Pistola M19</span><span style="padding: 6px 0; border-bottom: 1px solid #2e2e2c; text-align: right">× 1 · 9 balas</span>
+      <span style="padding: 6px 0; border-bottom: 1px solid #2e2e2c">Cuchillo de combate</span><span style="padding: 6px 0; border-bottom: 1px solid #2e2e2c; text-align: right">× 1</span>
+      <span style="padding: 6px 0; border-bottom: 1px solid #2e2e2c">Spray de primeros auxilios</span><span style="padding: 6px 0; border-bottom: 1px solid #2e2e2c; text-align: right">× 1</span>
+      <p style="grid-column: 1 / -1; margin: 14px 0 6px; font-size: 13px; letter-spacing: 0.2em; color: #9d9d99">CON ESTA DIFICULTAD</p>
+      <span style="padding: 4px 0; color: #a5a5a0">Daño recibido</span><span style="padding: 4px 0; text-align: right">× 1.0</span>
+      <span style="padding: 4px 0; color: #a5a5a0">Autoguardado</span><span style="padding: 4px 0; text-align: right">Activado</span>
+    </div>
+  </aside>
+
+  <div class="dn-toast" role="status" style="position: absolute; right: 64px; top: 30px; display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(0,0,0,.7); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); font: 500 15px 'Rajdhani'">
+    <span class="dn-dot" aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #e6e6e2"></span>Memoria falsa asignada a la ranura 1
+  </div>
+
+  <footer style="position: absolute; left: 64px; right: 64px; bottom: 30px; display: flex; justify-content: space-between; align-items: center">
+    <span style="display: flex; align-items: center; gap: 8px; font: 500 18px 'Rajdhani'"><span style="display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 4px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 11px">Esc</span>Volver</span>
+    <button class="dn-btn dn-main">Comenzar →</button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

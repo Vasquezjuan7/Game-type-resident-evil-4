@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dead Echo · Opciones</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.do-tab{all:unset;cursor:pointer;position:relative;flex:1;display:flex;align-items:center;justify-content:center;height:44px;font:600 16px 'Rajdhani',sans-serif;letter-spacing:.04em;color:#a9a9a5;border-right:1px solid #3c3c3a}
+.do-tab:hover{color:#fff}
+.do-tab-on{color:#fff}
+.do-tab-on::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:3px;background:radial-gradient(ellipse at center,#fff,rgba(255,255,255,0) 70%)}
+.do-sec{position:relative;height:30px;display:flex;align-items:center;padding-left:8px;margin-top:14px;font:500 15px 'Rajdhani',sans-serif;color:#9d9d99;letter-spacing:.04em}
+.do-sec::before{content:"";position:absolute;left:0;top:0;bottom:0;width:340px;background:linear-gradient(90deg,#2c2c2b,#3a3a38);clip-path:polygon(0 0,88% 0,100% 100%,0 100%);z-index:-1}
+.do-row{position:relative;display:grid;grid-template-columns:1fr 360px;align-items:center;height:46px;padding:0 22px 0 26px;border-bottom:1px solid #2e2e2c;font:500 18px 'Rajdhani',sans-serif;color:#e6e6e2}
+.do-on{background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.05) 60%,rgba(255,255,255,.12));box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 -6px 14px -8px rgba(255,255,255,.8)}
+.do-sel{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;text-align:center}
+.do-ar{all:unset;cursor:pointer;display:grid;place-items:center;height:44px;color:#bdbdb8;font-size:20px}
+.do-ar:hover{color:#fff}
+.do-seg{display:flex;justify-content:center;gap:3px;margin-top:3px}
+.do-seg i{display:block;width:16px;height:2px;background:#5a5a57}
+.do-seg i.on{background:#fff}
+.do-mark{position:absolute;right:-22px;top:50%;width:7px;height:7px;margin-top:-4px;background:#fff;transform:rotate(45deg)}
+@keyframes do-ring{0%{transform:scale(.1);opacity:.9}100%{transform:scale(1);opacity:0}}
+.do-ring{position:absolute;left:50%;top:50%;width:360px;height:360px;margin:-180px 0 0 -180px;border-radius:50%;border:1px solid #d8d8d3;animation:do-ring 6s ease-out infinite}
+@keyframes do-wave{to{stroke-dashoffset:-400}}
+.do-wave{stroke-dasharray:6 4;animation:do-wave 8s linear infinite}
+@keyframes do-sweep{to{transform:rotate(360deg)}}
+.do-sweep{animation:do-sweep 7s linear infinite;transform-origin:50% 50%}
+@keyframes do-blip{0%,70%,100%{opacity:0}75%{opacity:1}}
+.do-blip{animation:do-blip 7s linear infinite}
+@keyframes do-zpush{from{transform:scale(1.05)}to{transform:scale(1.14) translate(-10px,-6px)}}
+.do-zpush{animation:do-zpush 24s ease-in-out infinite alternate}
+@keyframes do-fogx{from{transform:translateX(-160px)}to{transform:translateX(160px)}}
+.do-fog{position:absolute;border-radius:50%;background:#f1f1ee;filter:blur(36px);animation:do-fogx 18s ease-in-out infinite alternate}
+@keyframes do-ash{0%{transform:translate(0,-10px);opacity:0}10%{opacity:.8}100%{transform:translate(-40px,490px);opacity:0}}
+.do-ash{position:absolute;top:0;width:3px;height:3px;border-radius:50%;background:#555;animation:do-ash 11s linear infinite}
+@media (prefers-reduced-motion:reduce){.do-zpush,.do-fog,.do-ash,.do-ring,.do-wave,.do-sweep,.do-blip{animation:none}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; position: relative; overflow: hidden; background: #0b0b0b; font-family: 'Rajdhani', sans-serif; color: #e6e6e2">
+  <h1 style="position: absolute; left: 64px; top: 22px; margin: 0; font: 600 28px 'Rajdhani', sans-serif; letter-spacing: 0.06em">OPCIONES</h1>
+  <nav style="position: absolute; left: 64px; right: 64px; top: 62px; display: flex; align-items: center; border-bottom: 1px solid #3c3c3a">
+    <span style="display: inline-grid; place-items: center; width: 26px; height: 20px; margin: 0 18px 0 12px; border-radius: 4px; background: #d8d8d3; color: #111; font: 700 12px 'Rajdhani'">Q</span>
+    <button class="do-tab" style="border-left: 1px solid #3c3c3a">CONTROLES</button><button class="do-tab">CÁMARA</button><button class="do-tab">HUD</button><button class="do-tab do-tab-on">GRÁFICOS</button><button class="do-tab">AUDIO</button><button class="do-tab">IDIOMA</button><button class="do-tab">ACCESIBILIDAD</button>
+    <span style="display: inline-grid; place-items: center; width: 26px; height: 20px; margin: 0 12px 0 18px; border-radius: 4px; background: #d8d8d3; color: #111; font: 700 12px 'Rajdhani'">E</span>
+  </nav>
+
+  <div style="position: absolute; left: 64px; top: 128px; width: 620px; isolation: isolate">
+    <div class="do-sec">Pantalla</div>
+    <div class="do-row do-on"><span>Resolución</span><span class="do-sel"><button class="do-ar" aria-label="Anterior">‹</button><span>1920 × 1080<span class="do-seg"><i></i><i></i><i class="on"></i><i></i></span></span><button class="do-ar" aria-label="Siguiente">›</button></span></div>
+    <div class="do-row"><span>Modo de pantalla</span><span class="do-sel"><button class="do-ar" aria-label="Anterior">‹</button><span>Pantalla completa<span class="do-seg"><i class="on"></i><i></i><i></i></span></span><button class="do-ar" aria-label="Siguiente">›</button></span></div>
+    <div class="do-row"><span>Límite de FPS</span><span class="do-sel"><button class="do-ar" aria-label="Anterior">‹</button><span>60<span class="do-seg"><i></i><i class="on"></i><i></i><i></i></span></span><button class="do-ar" aria-label="Siguiente">›</button></span><i class="do-mark" aria-label="Modificado"></i></div>
+    <div class="do-sec">Calidad</div>
+    <div class="do-row"><span>Preajuste de calidad</span><span class="do-sel"><button class="do-ar" aria-label="Anterior">‹</button><span>Alta<span class="do-seg"><i></i><i></i><i class="on"></i><i></i></span></span><button class="do-ar" aria-label="Siguiente">›</button></span></div>
+    <div class="do-row"><span>Sombras</span><span class="do-sel"><button class="do-ar" aria-label="Anterior">‹</button><span>Media<span class="do-seg"><i></i><i class="on"></i><i></i></span></span><button class="do-ar" aria-label="Siguiente">›</button></span></div>
+    <div class="do-row"><span>V-Sync</span><span class="do-sel"><button class="do-ar" aria-label="Anterior">‹</button><span>Activado<span class="do-seg"><i></i><i class="on"></i></span></span><button class="do-ar" aria-label="Siguiente">›</button></span></div>
+    <div class="do-sec">Imagen</div>
+    <div class="do-row"><span>Brillo</span><span style="display: flex; align-items: center; gap: 8px; color: #bdbdb8"><span>‹ –</span><svg aria-hidden="true" width="250" height="16" viewBox="0 0 250 16"><path d="M0 8 H250" stroke="#77776f"></path><g stroke="#77776f"><path d="M0 3 V13 M25 6 V10 M50 6 V10 M75 6 V10 M100 6 V10 M125 3 V13 M150 6 V10 M175 6 V10 M200 6 V10 M225 6 V10 M250 3 V13"></path></g><path d="M138 0 V16" stroke="#fff" stroke-width="2"></path></svg><span>+ ›</span><span style="width: 24px; text-align: right; color: #e6e6e2">55</span></span><i class="do-mark" aria-label="Modificado"></i></div>
+    <div class="do-row"><span>Grano de película</span><span style="display: flex; align-items: center; gap: 8px; color: #bdbdb8"><span>‹ –</span><svg aria-hidden="true" width="250" height="16" viewBox="0 0 250 16"><path d="M0 8 H250" stroke="#77776f"></path><g stroke="#77776f"><path d="M0 3 V13 M25 6 V10 M50 6 V10 M75 6 V10 M100 6 V10 M125 3 V13 M150 6 V10 M175 6 V10 M200 6 V10 M225 6 V10 M250 3 V13"></path></g><path d="M75 0 V16" stroke="#fff" stroke-width="2"></path></svg><span>+ ›</span><span style="width: 24px; text-align: right; color: #e6e6e2">30</span></span></div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; left: 712px; top: 140px; width: 2px; height: 470px; background: #2e2e2c"><div style="width: 2px; height: 210px; background: #8c8c87"></div></div>
+
+  <!-- zombie en la niebla (estilo pantalla de carga) -->
+  <div aria-hidden="true" style="position: absolute; left: 760px; top: 140px; width: 456px; height: 470px; overflow: hidden; background: #d6d6d2; -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 55%, transparent 100%)">
+    <div class="do-zpush" style="position: absolute; inset: 0"><img src="../referencias/zombie_01_niebla.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 92% 45%; filter: grayscale(1) contrast(1.15) brightness(1.05)"></div>
+    <div class="do-fog" style="left: -200px; top: 300px; width: 700px; height: 200px; opacity: .7"></div>
+    <div class="do-fog" style="left: -100px; top: -40px; width: 600px; height: 180px; opacity: .55; animation-duration: 24s; animation-direction: alternate-reverse"></div>
+    <span class="do-ash" style="left: 60px"></span><span class="do-ash" style="left: 150px; animation-delay: -3s"></span><span class="do-ash" style="left: 260px; animation-delay: -6s; width: 2px; height: 2px"></span><span class="do-ash" style="left: 340px; animation-delay: -1.5s"></span><span class="do-ash" style="left: 420px; animation-delay: -8s; width: 2px; height: 2px"></span>
+    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 58% 62% at 58% 50%, rgba(11,11,11,0) 45%, rgba(11,11,11,.75) 75%, #0b0b0b 100%)"></div>
+  </div>
+
+  <footer style="position: absolute; left: 0; right: 0; bottom: 26px; display: flex; justify-content: center; gap: 30px; font: 500 18px 'Rajdhani', sans-serif">
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 12px">R</span>Restablecer todo</span>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 12px">T</span>Restablecer categoría</span>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 12px">↵</span>Confirmar</span>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 4px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 11px">Esc</span>Volver</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

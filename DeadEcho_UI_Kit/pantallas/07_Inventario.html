@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dead Echo · Inventario</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.di-item{all:unset;cursor:pointer;position:absolute;box-sizing:border-box;display:grid;place-items:center;background:linear-gradient(160deg,rgba(90,90,88,.55),rgba(30,30,29,.75));box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.di-item:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+.di-sel{background:linear-gradient(160deg,rgba(235,235,230,.55),rgba(120,120,116,.45) 45%,rgba(40,40,38,.7));box-shadow:inset 0 0 0 1px #fff,0 0 14px rgba(255,255,255,.25)}
+.di-q{position:absolute;right:5px;bottom:2px;font:600 16px 'Rajdhani',sans-serif;color:#fff}
+.di-q-ok{color:#b9e4b0}
+.di-corner{position:absolute;right:3px;top:3px;width:0;height:0;border-left:9px solid transparent;border-top:9px solid #e6e6e2}
+.di-tab{all:unset;cursor:pointer;display:grid;place-items:center;width:46px;height:40px}
+.di-stat{display:flex;flex-direction:column;gap:3px;font:500 15px 'Rajdhani',sans-serif;color:#e6e6e2}
+.di-bar{height:3px;background:#4a4a47;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.di-bar span{position:absolute;left:0;top:0;bottom:0;background:#f2f2ee}
+@keyframes di-pulse{0%,100%{box-shadow:inset 0 0 0 1px #fff,0 0 10px rgba(255,255,255,.15)}50%{box-shadow:inset 0 0 0 1px #fff,0 0 22px rgba(255,255,255,.4)}}
+.di-sel{animation:di-pulse 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.di-sel{animation:none}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; position: relative; overflow: hidden; background: #121212; font-family: 'Rajdhani', sans-serif; color: #e6e6e2">
+  <svg aria-hidden="true" width="1280" height="720" viewBox="0 0 1280 720" style="position: absolute; inset: 0; filter: grayscale(1) blur(2px) brightness(.8)">
+    <rect width="1280" height="720" fill="#2a2a29"></rect>
+    <rect x="0" y="0" width="240" height="720" fill="#1b1b1a"></rect>
+    <g stroke="#2f2f2d" stroke-width="2"><path d="M0 120 H240 M0 220 H240 M0 320 H240 M0 420 H240 M0 520 H240 M0 620 H240"></path></g>
+    <path d="M240 0 L520 140 L520 720 L240 720 Z" fill="#232322"></path>
+    <path d="M420 0 L700 380" stroke="#3d3d3b" stroke-width="10"></path><path d="M600 0 L880 420" stroke="#363634" stroke-width="8"></path>
+    <rect x="1040" y="0" width="240" height="720" fill="#3a3a38"></rect>
+    <path d="M1060 380 L1280 360 L1280 640 L1060 650 Z" fill="#5a5a57"></path><circle cx="1180" cy="650" r="40" fill="#1a1a19"></circle>
+    <rect x="1060" y="20" width="120" height="60" fill="#c9c9c4" opacity=".7"></rect>
+    <path d="M940 120 L1000 120 L1010 600 L930 600 Z" fill="#1b1b1a"></path>
+  </svg>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(8,8,8,.62)"></div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1.2px); background-size: 8px 8px"></div>
+  <div aria-hidden="true" style="position: absolute; left: 232px; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.12)"></div>
+  <div aria-hidden="true" style="position: absolute; right: 232px; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.12)"></div>
+
+  <p style="position: absolute; left: 40px; top: 44px; margin: 0; display: flex; align-items: center; gap: 10px; font: 500 22px 'Rajdhani', sans-serif"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M8 1 L15 8 L8 15 L1 8 Z" fill="none" stroke="#e6e6e2" stroke-width="1.5"></path></svg>Encuentra la llave del sótano</p>
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 76px; width: 400px; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.35), rgba(255,255,255,0))"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 34px; display: flex; justify-content: center; align-items: center; gap: 70px">
+    <span style="display: inline-grid; place-items: center; width: 26px; height: 20px; border-radius: 4px; background: #d8d8d3; color: #111; font: 700 12px 'Rajdhani'">Q</span>
+    <div style="display: flex; gap: 10px; align-items: flex-start">
+      <button class="di-tab" aria-label="Mapa"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#bdbdb8" stroke-width="1.6"><circle cx="13" cy="13" r="10"></circle><path d="M13 3 V23 M3 13 H23"></path><path d="M13 8 L15 13 L13 18 L11 13 Z" fill="#bdbdb8"></path></svg></button>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px"><button class="di-tab" aria-label="Objetos" style="background: linear-gradient(180deg, #dcdcd7, #8c8c88); box-shadow: 0 0 12px rgba(255,255,255,.3)"><svg width="28" height="24" viewBox="0 0 28 24" fill="none" stroke="#1a1a19" stroke-width="1.8"><rect x="2" y="7" width="24" height="15" rx="2"></rect><path d="M10 7 V3 H18 V7 M2 13 H26"></path></svg></button><span style="font: 600 15px 'Rajdhani'; letter-spacing: 0.08em">OBJETOS</span></div>
+      <button class="di-tab" aria-label="Documentos"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#bdbdb8" stroke-width="1.6"><path d="M5 8 L17 5 L21 19 L9 22 Z"></path><path d="M9 4 H19 V18"></path></svg></button>
+    </div>
+    <span style="display: inline-grid; place-items: center; width: 26px; height: 20px; border-radius: 4px; background: #d8d8d3; color: #111; font: 700 12px 'Rajdhani'">E</span>
+  </div>
+  <div style="position: absolute; right: 40px; top: 44px; width: 170px; height: 28px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-sizing: border-box; background: rgba(0,0,0,.6); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); font: 600 18px 'Rajdhani'"><span style="font-size: 13px; letter-spacing: 0.15em; color: #9d9d99">ECOS</span><span>0</span></div>
+
+  <!-- etiquetas laterales y filas -->
+  <span style="position: absolute; left: 352px; top: 104px; writing-mode: vertical-rl; font: 600 10px 'Rajdhani'; letter-spacing: 0.2em; color: #8d8d89; padding: 4px 2px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18)">DATOS DEL AGENTE</span>
+  <span style="position: absolute; left: 912px; top: 104px; writing-mode: vertical-rl; font: 600 10px 'Rajdhani'; letter-spacing: 0.2em; color: #8d8d89; padding: 4px 2px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18)">CONTENIDO</span>
+  <div style="position: absolute; left: 352px; top: 224px; display: flex; flex-direction: column; gap: 39px; font: 600 9px 'Rajdhani'; color: #8d8d89">
+    <span style="width: 16px; height: 14px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2)">03</span><span style="width: 16px; height: 14px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2)">04</span><span style="width: 16px; height: 14px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2)">05</span><span style="width: 16px; height: 14px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2)">06</span><span style="width: 16px; height: 14px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2)">07</span>
+  </div>
+
+  <!-- cuadrícula 10×7 (celdas de 50 px + 3 px) -->
+  <div style="position: absolute; left: 377px; top: 100px; width: 530px; height: 371px; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.2) 0 1px, rgba(0,0,0,0) 1px 53px), repeating-linear-gradient(180deg, rgba(255,255,255,.2) 0 1px, rgba(0,0,0,0) 1px 53px); background-color: rgba(0,0,0,.35); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2)">
+    <button class="di-item di-sel" aria-label="Pistola M19, 9 balas" style="left: 2px; top: 2px; width: 103px; height: 103px">
+      <svg width="78" height="56" viewBox="0 0 78 56"><path d="M6 8 H70 L72 12 H74 V20 H44 L42 24 H36 L34 22 L26 52 H12 L18 22 L6 20 Z" fill="#e8e8e3" stroke="#2a2a28" stroke-width="1.2"></path><path d="M10 12 H66" stroke="#6b6b67" stroke-width="2"></path><path d="M30 24 Q34 30 40 24" fill="none" stroke="#2a2a28" stroke-width="1.5"></path></svg>
+      <span class="di-corner"></span><span class="di-q di-q-ok">9</span>
+    </button>
+    <button class="di-item" aria-label="Escopeta, 5 cartuchos" style="left: 108px; top: 2px; width: 156px; height: 103px">
+      <svg width="140" height="50" viewBox="0 0 140 50"><path d="M2 14 H96 L100 10 H112 V20 H96 L60 22 L50 26 L20 40 L4 40 L8 30 L2 26 Z" fill="#d9d9d4" stroke="#2a2a28" stroke-width="1.2"></path><path d="M6 18 H94" stroke="#7a7a76" stroke-width="2"></path><path d="M112 14 H138" stroke="#d9d9d4" stroke-width="5"></path></svg>
+      <span class="di-q di-q-ok">5</span>
+    </button>
+    <button class="di-item" aria-label="Hacha" style="left: 267px; top: 2px; width: 156px; height: 50px">
+      <svg width="120" height="38" viewBox="0 0 120 38"><path d="M6 20 H96" stroke="#d0d0cb" stroke-width="5" stroke-linecap="round"></path><path d="M92 4 Q110 6 116 18 Q110 32 92 34 L96 22 L92 18 Z" fill="#e2e2dd" stroke="#2a2a28"></path></svg>
+      <span aria-hidden="true" style="position: absolute; left: 30px; right: 30px; bottom: 5px; height: 2px; background: #3d3d3b"><span style="display: block; width: 70%; height: 2px; background: #9fd18f"></span></span>
+      <span class="di-corner"></span>
+    </button>
+    <button class="di-item" aria-label="Munición de pistola, 30" style="left: 426px; top: 2px; width: 103px; height: 50px">
+      <svg width="54" height="20" viewBox="0 0 54 20"><g fill="#d9d9d4"><rect x="2" y="4" width="4" height="12" rx="2"></rect><rect x="9" y="4" width="4" height="12" rx="2"></rect><rect x="16" y="4" width="4" height="12" rx="2"></rect><rect x="23" y="4" width="4" height="12" rx="2"></rect><rect x="30" y="4" width="4" height="12" rx="2"></rect><rect x="37" y="4" width="4" height="12" rx="2"></rect><rect x="44" y="4" width="4" height="12" rx="2"></rect></g></svg>
+      <span class="di-q">30</span>
+    </button>
+    <button class="di-item" aria-label="Spray de primeros auxilios, 1" style="left: 267px; top: 55px; width: 50px; height: 50px">
+      <svg width="18" height="36" viewBox="0 0 18 36"><rect x="3" y="8" width="12" height="26" rx="3" fill="#e2e2dd"></rect><rect x="6" y="2" width="6" height="6" fill="#9a9a96"></rect><rect x="6" y="14" width="6" height="8" fill="#7bbf6a"></rect></svg>
+      <span class="di-q">1</span>
+    </button>
+    <button class="di-item" aria-label="Hierba verde, 2" style="left: 320px; top: 55px; width: 50px; height: 50px">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="#c9c9c4"><path d="M15 28 V12"></path><path d="M15 14 Q4 12 4 2 Q14 4 15 14 Z"></path><path d="M15 16 Q26 14 27 4 Q16 6 15 16 Z"></path><rect x="14" y="12" width="2" height="16"></rect></svg>
+      <span class="di-q">2</span>
+    </button>
+  </div>
+
+  <!-- detalle del objeto -->
+  <div aria-hidden="true" style="position: absolute; left: 330px; right: 330px; top: 508px; height: 1px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.3) 0 2px, rgba(0,0,0,0) 2px 6px)"></div>
+  <div style="position: absolute; left: 330px; top: 528px; width: 300px; height: 118px; padding: 12px 16px; box-sizing: border-box; background: rgba(0,0,0,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1)">
+    <h2 style="margin: 0 0 4px; font: 600 19px 'Rajdhani', sans-serif">Pistola M19</h2>
+    <p style="margin: 0; font: 500 16px 'Rajdhani', sans-serif; line-height: 1.25; color: #d4d4cf">Semiautomática confiable. Modelo modificado entregado a los agentes de contención.</p>
+  </div>
+  <div style="position: absolute; left: 640px; top: 528px; width: 310px; height: 118px; padding: 12px 16px; box-sizing: border-box; background: rgba(0,0,0,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px">
+    <div class="di-stat"><span>Daño</span><span class="di-bar"><span style="width: 25%"></span></span></div>
+    <div class="di-stat"><span>Cadencia</span><span class="di-bar"><span style="width: 45%"></span></span></div>
+    <div class="di-stat"><span>Estabilidad</span><span class="di-bar"><span style="width: 40%"></span></span></div>
+    <div class="di-stat"><span>Recarga</span><span class="di-bar"><span style="width: 60%"></span></span></div>
+    <div class="di-stat"><span>Precisión</span><span class="di-bar"><span style="width: 45%"></span></span></div>
+    <div class="di-stat"><span>Capacidad</span><span style="font: 600 18px 'Rajdhani'; line-height: 1">9</span></div>
+  </div>
+
+  <footer style="position: absolute; left: 0; right: 0; bottom: 22px; display: flex; justify-content: center; gap: 30px; font: 500 18px 'Rajdhani', sans-serif">
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 12px">F</span>Ordenar (mantener)</span>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 12px">R</span>Mover / rotar</span>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 12px">↵</span>Usar / combinar</span>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 12px; border: 1.5px solid #cfcfcb; font-size: 12px">Tab</span>Cerrar</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

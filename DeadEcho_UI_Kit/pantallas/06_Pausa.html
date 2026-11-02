@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dead Echo · Pausa</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&amp;family=Courier+Prime&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.dp-item{all:unset;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;width:320px;height:40px;font:500 20px 'Rajdhani',sans-serif;letter-spacing:.02em;color:#e9e9e6}
+.dp-item:hover{color:#fff}
+.dp-on{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.06) 55%,rgba(255,255,255,.14));box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),inset 0 -6px 14px -8px rgba(255,255,255,.9),0 0 18px rgba(0,0,0,.6);color:#fff}
+.dp-on::after{content:"";position:absolute;left:30%;right:30%;bottom:3px;height:2px;background:radial-gradient(ellipse at center,#fff,rgba(255,255,255,0) 70%)}
+@keyframes dp-bars{0%,100%{opacity:.55}50%{opacity:.9}}
+.dp-bars{animation:dp-bars 4s ease-in-out infinite}
+@keyframes dp-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.dp-menu{animation:dp-in .35s ease-out both}
+@media (prefers-reduced-motion:reduce){.dp-bars,.dp-menu{animation:none}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; position: relative; overflow: hidden; background: #141414; font-family: 'Rajdhani', sans-serif; color: #e9e9e6">
+  <svg aria-hidden="true" width="1280" height="720" viewBox="0 0 1280 720" style="position: absolute; inset: 0; filter: blur(7px) grayscale(1) brightness(1.05)">
+    <rect width="1280" height="720" fill="#2b2c2b"></rect>
+    <path d="M0 0 L420 180 L420 560 L0 720 Z" fill="#1d1e1d"></path>
+    <path d="M1280 0 L860 180 L860 560 L1280 720 Z" fill="#232423"></path>
+    <rect x="420" y="180" width="440" height="380" fill="#383a38"></rect>
+    <rect x="570" y="250" width="140" height="260" fill="#0f0f0f"></rect>
+    <path d="M420 560 L860 560 L1280 720 L0 720 Z" fill="#1a1a19"></path>
+    <ellipse cx="640" cy="200" rx="160" ry="40" fill="#8a8c8a" opacity=".5"></ellipse>
+    <path d="M520 320 Q560 260 610 300 L640 520 L500 520 Z" fill="#111"></path>
+  </svg>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 50% 45%, rgba(20,20,20,.35), rgba(10,10,10,.85))"></div>
+  <div class="dp-bars" aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; width: 120px; background: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 10px, rgba(255,255,255,.10) 10px 13px, rgba(255,255,255,0) 13px 22px); -webkit-mask-image: linear-gradient(90deg, #000, transparent); mask-image: linear-gradient(90deg, #000, transparent)"></div>
+  <div class="dp-bars" aria-hidden="true" style="position: absolute; right: 0; top: 0; bottom: 0; width: 120px; background: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 10px, rgba(255,255,255,.10) 10px 13px, rgba(255,255,255,0) 13px 22px); -webkit-mask-image: linear-gradient(270deg, #000, transparent); mask-image: linear-gradient(270deg, #000, transparent)"></div>
+
+  <div class="dp-menu" style="position: absolute; left: 0; right: 0; top: 150px; display: flex; flex-direction: column; align-items: center; gap: 2px">
+    <h1 style="margin: 0 0 18px; font: 600 40px 'Rajdhani', sans-serif; letter-spacing: 0.06em">PAUSA</h1>
+    <button class="dp-item dp-on">Reanudar</button>
+    <button class="dp-item">Reiniciar desde punto de control</button>
+    <button class="dp-item">Cargar partida</button>
+    <button class="dp-item">Tutoriales</button>
+    <button class="dp-item">Opciones</button>
+    <button class="dp-item">Salir al menú principal</button>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 36px; display: flex; flex-direction: column; align-items: center; gap: 10px">
+    <p style="margin: 0; font: 500 18px 'Rajdhani', sans-serif; color: #cfcfcb">Vuelve a la partida donde la dejaste.</p>
+    <div style="display: flex; gap: 26px; font: 500 18px 'Rajdhani', sans-serif">
+      <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; box-sizing: border-box; border-radius: 13px; border: 1.5px solid #cfcfcb; font-size: 13px">↵</span>Confirmar</span>
+      <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 5px; box-sizing: border-box; border-radius: 13px; border: 1.5px solid #cfcfcb; font-size: 12px">Esc</span>Cerrar</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

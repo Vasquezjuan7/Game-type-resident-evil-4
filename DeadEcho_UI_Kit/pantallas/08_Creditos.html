@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Créditos</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&amp;family=Oswald:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes fall{0%{transform:translateY(0);opacity:0}6%{opacity:1}88%{opacity:1}100%{transform:translateY(700px);opacity:0}}
+.rf-line{position:absolute;left:0;right:0;top:40px;text-align:center}
+.rf-w{display:inline-block;margin:0 .18em;animation:fall 12s linear infinite}
+.rf-a .rf-w{animation-delay:0s}.rf-a .rf-w:nth-child(2){animation-delay:.15s}.rf-a .rf-w:nth-child(3){animation-delay:.3s}.rf-a .rf-w:nth-child(4){animation-delay:.45s}
+.rf-b .rf-w{animation-delay:-3s}.rf-b .rf-w:nth-child(2){animation-delay:-2.85s}.rf-b .rf-w:nth-child(3){animation-delay:-2.7s}.rf-b .rf-w:nth-child(4){animation-delay:-2.55s}
+.rf-c .rf-w{animation-delay:-6s}.rf-c .rf-w:nth-child(2){animation-delay:-5.85s}.rf-c .rf-w:nth-child(3){animation-delay:-5.7s}.rf-c .rf-w:nth-child(4){animation-delay:-5.55s}
+.rf-d .rf-w{animation-delay:-9s}.rf-d .rf-w:nth-child(2){animation-delay:-8.85s}.rf-d .rf-w:nth-child(3){animation-delay:-8.7s}.rf-d .rf-w:nth-child(4){animation-delay:-8.55s}
+@media (prefers-reduced-motion:reduce){.rf-w{animation:none}.rf-b{top:200px}.rf-c{top:300px}.rf-d{top:400px}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; position: relative; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #1f1b17, #050505 75%); font-family: 'Special Elite', serif; color: #ECE6D8">
+  <div style="position: absolute; left: 0; right: 0; top: 0; height: 640px; overflow: hidden">
+    <p class="rf-line rf-a" style="margin: 0; font-family: 'Oswald'; font-size: 22px; letter-spacing: 0.3em; color: #A3191B"><span class="rf-w">HECHO</span><span class="rf-w">CON</span><span class="rf-w">AMOR</span><span class="rf-w">POR</span></p>
+    <p class="rf-line rf-b" style="margin: 0; font-size: 40px"><span class="rf-w">Juan</span><span class="rf-w">Diego</span><span class="rf-w">Gonzales</span><span class="rf-w">Sánchez</span></p>
+    <p class="rf-line rf-c" style="margin: 0; font-size: 40px"><span class="rf-w">Juan</span><span class="rf-w">José</span><span class="rf-w">Muñoz</span><span class="rf-w">Jurado</span></p>
+    <p class="rf-line rf-d" style="margin: 0; font-size: 40px"><span class="rf-w">Juan</span><span class="rf-w">José</span><span class="rf-w">Pérez</span><span class="rf-w">Bravo</span></p>
+  </div>
+  <footer style="position: absolute; left: 96px; right: 96px; bottom: 0; height: 80px; border-top: 1px solid #3a352e; display: flex; justify-content: space-between; align-items: center; font-family: 'Oswald'; font-size: 13px; letter-spacing: 0.12em; color: #8E887C">
+    <span>DEAD ECHO · 2026</span><span>Esc Volver</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

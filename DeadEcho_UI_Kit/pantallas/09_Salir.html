@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dead Echo · Salir</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.dx-btn{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:center;width:300px;height:40px;font:500 20px 'Rajdhani',sans-serif;color:#e9e9e6}
+.dx-on{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.06) 55%,rgba(255,255,255,.14));box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),inset 0 -6px 14px -8px rgba(255,255,255,.9)}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; position: relative; overflow: hidden; background: #0e0e0e; font-family: 'Rajdhani', sans-serif; color: #e9e9e6">
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 60% 45%, #2c2c2a, #0b0b0b 80%); filter: blur(4px)"></div>
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 230px; height: 260px; background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.75) 20%, rgba(0,0,0,.75) 80%, rgba(0,0,0,0))"></div>
+  <div role="dialog" aria-labelledby="dx-t" style="position: absolute; left: 0; right: 0; top: 250px; display: flex; flex-direction: column; align-items: center; gap: 6px">
+    <h2 id="dx-t" style="margin: 0; font: 600 30px 'Rajdhani', sans-serif; letter-spacing: 0.04em">¿Salir de Dead Echo?</h2>
+    <p style="margin: 0 0 18px; font: 500 18px 'Rajdhani', sans-serif; color: #b9b9b5">El progreso desde tu último guardado se perderá.</p>
+    <button class="dx-btn dx-on">No, volver</button>
+    <button class="dx-btn">Sí, salir del juego</button>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; bottom: 36px; display: flex; justify-content: center; gap: 26px; font: 500 18px 'Rajdhani', sans-serif">
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 13px; border: 1.5px solid #cfcfcb; font-size: 13px">↵</span>Confirmar</span>
+    <span style="display: flex; align-items: center; gap: 8px"><span style="display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 5px; box-sizing: border-box; border-radius: 13px; border: 1.5px solid #cfcfcb; font-size: 12px">Esc</span>Cancelar</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
