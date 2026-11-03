@@ -1057,6 +1057,9 @@ namespace Gameplay
             if (_voice == null || clip == null) return;
             _voice.pitch = Random.Range(0.85f, 1.1f);
             _voice.PlayOneShot(clip, volume);
-        }
+        }
+
+        /// <summary>Indica si el aldeano ya ha detectado a Leon y participa activamente en el combate.</summary>
+        public bool IsAlertedAndAlive => !IsDead && State != GanadoState.Idle;
     }
 }
