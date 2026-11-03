@@ -227,6 +227,10 @@ namespace Gameplay.RE4
             Vector3 ab = b - a;
             float t = ab.sqrMagnitude > 1e-6f ? Mathf.Clamp01(Vector3.Dot(p - a, ab) / ab.sqrMagnitude) : 0f;
             return Vector3.Distance(p, a + ab * t);
-        }
+        }
+
+        /// <summary>Indica si el arma arrojadiza sigue en el aire y el tiempo restante de mecha si es dinamita.</summary>
+        public bool IsAirborne => !_stuck && !_exploded;
+        public float RemainingFuse => kind == ThrowKind.Dynamite ? Mathf.Max(0f, _fuse) : 0f;
     }
 }
