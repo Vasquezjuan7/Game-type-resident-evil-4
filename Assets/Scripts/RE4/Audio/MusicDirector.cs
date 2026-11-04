@@ -76,12 +76,14 @@ namespace Gameplay.RE4
             else _dangerHold -= Time.unscaledDeltaTime;
             bool combat = danger || _dangerHold > 0f;
 
-            if (danger && !_wasDanger && _sting != null) _sting.PlayOneShot(_sting.clip, 0.8f);
+            if (danger && !_wasDanger && _sting != null) _sting.PlayOneShot(_sting.clip, 0.8f * DeadEcho.Core.AudioChannels.Music);
             _wasDanger = danger;
 
             _combatLevel = Mathf.MoveTowards(_combatLevel, combat ? 1f : 0f, Time.unscaledDeltaTime * fadeSpeed);
             bool dead = PlayerHealth.Instance != null && PlayerHealth.Instance.IsDead;
-            float master = dead ? 0.3f : 1f;
+            float master = DeadEcho.Core.AudioChannels.AsMusic(_explore, dead ? 0.3f : 1f); // Opciones › Audio › Música
+            if (_combat != null) _combat.ignoreListenerVolume = true;
+            if (_sting != null) _sting.ignoreListenerVolume = true;
             if (_explore != null) _explore.volume = exploreVolume * (1f - _combatLevel) * master;
             if (_combat != null) _combat.volume = combatVolume * _combatLevel * master;
         }
