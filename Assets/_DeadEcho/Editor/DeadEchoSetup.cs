@@ -40,7 +40,69 @@ namespace DeadEcho.EditorTools
                 if (AssetDatabase.LoadAssetAtPath<UITheme>(ThemePath) == null) BuildBase();
                 // F1: la escena del menu principal se crea sola la primera vez (sin tocar la escena abierta)
                 if (!File.Exists(MainMenuScene)) BuildMainMenuScene();
+                // F2: modelos de las tomas cinematicas
+                if (AssetDatabase.LoadAssetAtPath<MenuShotsConfig>(MenuShotsPath) == null) BuildMenuShots();
+                ApplyStartInMenu();
             };
+        }
+
+        // =========================================================== Arrancar en el menu principal
+
+        private const string StartInMenuPref = "DeadEcho.EmpezarEnMenu";
+
+        /// <summary>
+        /// Al pulsar Play (con cualquier escena abierta) el juego empieza en el menu principal, como en la build.
+        /// Se puede desactivar desde el menu Dead Echo para probar una escena suelta.
+        /// </summary>
+        private static void ApplyStartInMenu()
+        {
+            bool on = EditorPrefs.GetBool(StartInMenuPref, true);
+            SceneAsset menu = AssetDatabase.LoadAssetAtPath<SceneAsset>(MainMenuScene);
+            EditorSceneManager.playModeStartScene = on ? menu : null;
+            Menu.SetChecked(StartInMenuMenu, on);
+        }
+
+        private const string StartInMenuMenu = "Dead Echo/Play empieza en el menú principal";
+
+        [MenuItem(StartInMenuMenu, priority = 2)]
+        private static void ToggleStartInMenu()
+        {
+            EditorPrefs.SetBool(StartInMenuPref, !EditorPrefs.GetBool(StartInMenuPref, true));
+            ApplyStartInMenu();
+            Debug.Log("[DeadEcho] Play empieza en el menú principal: " + (EditorPrefs.GetBool(StartInMenuPref, true) ? "SÍ" : "NO (empieza en la escena abierta)"));
+        }
+
+        // =========================================================== F2 · Tomas del menu
+
+        public const string MenuShotsPath = ResFolder + "/MenuShots.asset";
+
+        /// <summary>
+        /// Crea (o rellena) Resources/DeadEcho/MenuShots con los modelos del juego para las 3 tomas:
+        /// aldeano en la niebla (y aldeanas al fondo), aldeana en el bosque y el Tyrant en la calle en llamas.
+        /// Se puede cambiar cualquier modelo desde el Inspector del asset.
+        /// </summary>
+        [MenuItem("Dead Echo/F2 · Configurar tomas del menú", priority = 11)]
+        public static void BuildMenuShots()
+        {
+            EnsureFolder(ResFolder);
+            var cfg = AssetDatabase.LoadAssetAtPath<MenuShotsConfig>(MenuShotsPath);
+            bool created = cfg == null;
+            if (created) cfg = ScriptableObject.CreateInstance<MenuShotsConfig>();
+
+            const string enemies = "Assets/RE4/Prefabs/Enemies/";
+            GameObject aldeano = AssetDatabase.LoadAssetAtPath<GameObject>(enemies + "Ganado_Aldeano.prefab");
+            GameObject aldeana = AssetDatabase.LoadAssetAtPath<GameObject>(enemies + "Ganado_Aldeana.prefab");
+            GameObject tyrant = AssetDatabase.LoadAssetAtPath<GameObject>(enemies + "Jefe_Tyrant.prefab");
+            if (cfg.shot1Main == null) cfg.shot1Main = aldeano;
+            if (cfg.shot1Background == null) cfg.shot1Background = aldeana != null ? aldeana : aldeano;
+            if (cfg.shot2Main == null) cfg.shot2Main = aldeana != null ? aldeana : aldeano;
+            if (cfg.shot3Main == null) cfg.shot3Main = tyrant != null ? tyrant : aldeano;
+
+            if (created) AssetDatabase.CreateAsset(cfg, MenuShotsPath);
+            else EditorUtility.SetDirty(cfg);
+            AssetDatabase.SaveAssets();
+            if (aldeano == null) Debug.LogWarning("[DeadEcho] No se encontraron los prefabs de enemigos (menú RE4 > Construir pueblo): las tomas usarán siluetas.");
+            Debug.Log("[DeadEcho] Tomas del menú configuradas en " + MenuShotsPath + ".");
         }
 
         // =========================================================== Menu
