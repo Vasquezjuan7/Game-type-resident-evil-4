@@ -123,5 +123,4 @@ El juego cuenta con un sistema de guardado real en 3 ranuras que persiste:
 
 ---
 *Desarrollado con ❤️ y Unity para la clase de Diseño de Interfaces.*
-```eof
 
