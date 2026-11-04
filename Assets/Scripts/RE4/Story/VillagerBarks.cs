@@ -4,8 +4,8 @@ namespace Gameplay.RE4
 {
     /// <summary>
     /// Gritos de los aldeanos en espanol, como los Ganados de RE4: avisos, insultos y amenazas cortas.
-    /// Se generan una vez con la voz de Gemini (en segundo plano, poco a poco) y despues suenan al instante
-    /// desde la cache, pasados por un filtro de voz rasposa en <see cref="Gameplay.ZombieAI"/>.
+    /// Vienen grabadas con ElevenLabs en Resources/RE4Audio/Frases/{Aldeano,Aldeana}; las que falten se generan
+    /// con la voz de Windows (en segundo plano) y se pasan por un filtro de voz rasposa en <see cref="Gameplay.ZombieAI"/>.
     /// </summary>
     public static class VillagerBarks
     {
@@ -45,7 +45,7 @@ namespace Gameplay.RE4
         /// <summary>Clip de una frase al azar ya generado (null si aun no esta listo).</summary>
         public static AudioClip Pick(string[] set, string voice)
         {
-            if (!NpcVoice.Enabled || set == null || set.Length == 0) return null;
+            if (set == null || set.Length == 0) return null; // Cached() incluye las frases de ElevenLabs aunque no haya voz de Windows
             NpcVoice v = NpcVoice.Get();
             int start = Random.Range(0, set.Length);
             for (int i = 0; i < set.Length; i++)
