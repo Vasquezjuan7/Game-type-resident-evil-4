@@ -12,16 +12,21 @@ namespace Gameplay.RE4
         public static readonly List<Merchant> All = new List<Merchant>();
 
         public float talkRange = 2.8f;
+        [Tooltip("Modelo del mercader en Resources (convertido de 'The Shrewd Scoundrel'). Vacio = figura sencilla.")]
+        public string modelResource = "RE4Modelos/Mercader/Mercader";
+        [Tooltip("Giro del modelo si no mira de frente al jugador.")]
+        public float modelYaw = 0f;
 
         private Light _lantern;
         private float _baseIntensity;
+        private static Material _modelMat;
 
         private void OnEnable() => All.Add(this);
         private void OnDisable() => All.Remove(this);
 
         private void Start()
         {
-            if (GetComponentsInChildren<Renderer>().Length == 0) BuildModel();
+            if (GetComponentsInChildren<Renderer>().Length == 0 && !LoadModel()) BuildModel();
             _lantern = GetComponentInChildren<Light>();
             if (_lantern != null) _baseIntensity = _lantern.intensity;
         }
@@ -59,7 +64,74 @@ namespace Gameplay.RE4
             ui.Open();
         }
 
-        // ------------------------------------------------------------ Modelo procedimental
+        // ------------------------------------------------------------ Modelo descargado
+
+        /// <summary>
+        /// Pone el modelo del mercader (Resources). Mide 1,80 m y ya viene con los pies en el suelo.
+        /// Se le añaden la caja de mercancia, el farol azul y la colision.
+        /// </summary>
+        private bool LoadModel()
+        {
+            if (string.IsNullOrEmpty(modelResource)) return false;
+            GameObject prefab = Resources.Load<GameObject>(modelResource);
+            if (prefab == null) return false;
+
+            GameObject model = Instantiate(prefab, transform);
+            model.name = "Modelo_Mercader";
+            model.transform.localPosition = Vector3.zero;
+            model.transform.localRotation = Quaternion.Euler(0f, modelYaw, 0f);
+            foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c);
+
+            if (_modelMat == null)
+            {
+                _modelMat = new Material(Shader.Find("Standard")) { name = "Mercader" };
+                Texture2D color = Resources.Load<Texture2D>(modelResource.Substring(0, modelResource.LastIndexOf('/') + 1) + "Mercader_Color");
+                Texture2D normal = Resources.Load<Texture2D>(modelResource.Substring(0, modelResource.LastIndexOf('/') + 1) + "Mercader_Normal");
+                if (color != null) _modelMat.mainTexture = color;
+                if (normal != null)
+                {
+                    _modelMat.SetTexture("_BumpMap", normal);
+                    _modelMat.EnableKeyword("_NORMALMAP");
+                }
+                _modelMat.SetFloat("_Glossiness", 0.22f);
+                _modelMat.SetFloat("_Metallic", 0f);
+            }
+            foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
+            {
+                var mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++) mats[i] = _modelMat;
+                r.sharedMaterials = mats;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            }
+
+            BuildCrateAndLantern(new Vector3(0.95f, 0f, 0.25f));
+            return true;
+        }
+
+        /// <summary>Caja de mercancia con el farol azul encima, y la colision del mercader.</summary>
+        private void BuildCrateAndLantern(Vector3 crate)
+        {
+            Part(PrimitiveType.Cube, crate + new Vector3(0f, 0.3f, 0f), new Vector3(0.7f, 0.6f, 0.5f), new Vector3(0f, 15f, 0f), new Color(0.35f, 0.24f, 0.13f));
+            GameObject lamp = Part(PrimitiveType.Cylinder, crate + new Vector3(0f, 0.72f, 0f), new Vector3(0.14f, 0.12f, 0.14f), Vector3.zero, new Color(1f, 0.7f, 0.3f));
+            Renderer lr = lamp.GetComponent<Renderer>();
+            lr.material.EnableKeyword("_EMISSION");
+            lr.material.SetColor("_EmissionColor", new Color(0.35f, 0.55f, 1f) * 2.5f);
+            Light l = new GameObject("Farol").AddComponent<Light>();
+            l.transform.SetParent(transform, false);
+            l.transform.localPosition = crate + new Vector3(0f, 0.95f, 0f);
+            l.type = LightType.Point;
+            l.color = new Color(0.45f, 0.62f, 1f); // farol azul: se ve de lejos en la noche
+            l.range = 9f;
+            l.intensity = 2.2f;
+            l.shadows = LightShadows.Soft;
+
+            CapsuleCollider col = gameObject.AddComponent<CapsuleCollider>();
+            col.center = new Vector3(0f, 0.9f, 0f);
+            col.height = 1.8f;
+            col.radius = 0.4f;
+        }
+
+        // ------------------------------------------------------------ Modelo procedimental (si falta el descargado)
 
         private void BuildModel()
         {
@@ -113,7 +185,7 @@ namespace Gameplay.RE4
             g.transform.localRotation = Quaternion.Euler(euler);
             g.GetComponent<Renderer>().material.color = color;
             return g;
-        }
+        }
 
         /// <summary>Calcula la distancia horizontal en el plano XZ hasta la posición indicada.</summary>
         public float PlanarDistanceTo(Vector3 pos)
