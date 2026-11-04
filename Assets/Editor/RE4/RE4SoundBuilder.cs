@@ -35,6 +35,14 @@ namespace LevelSetup.RE4Tools
             Rifle(db.rifle, 1f);
             Rifle(db.smg, 1.22f);
             Shotgun(db.shotgun);
+            // Francotirador: disparo de rifle mas grave, cerrojo con los sonidos metalicos de la escopeta
+            Rifle(db.sniper, 0.78f);
+            if (db.sniper != null)
+            {
+                db.sniper.rackBackClip = Clip(Sfx + "Shotgun/Reload/sfx_wpn_sgn_reload_01_charge.wav");
+                db.sniper.rackClip = Clip(Sfx + "AssaultRifle/Reload/sfx_wpn_ar_reload_04_charge.wav");
+                EditorUtility.SetDirty(db.sniper);
+            }
             if (db.rocket != null)
             {
                 db.rocket.shotClips = Clips(Sfx + "GrenadeLauncher", "fire");

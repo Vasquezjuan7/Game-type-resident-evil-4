@@ -18,16 +18,16 @@ namespace LevelSetup.RE4Tools
         public class Database
         {
             public CombatFXLibrary fx;
-            public ItemDefinition ammoHandgun, ammoShotgun, ammoSmg, ammoRifle, ammoRocket, ammoMagnum;
+            public ItemDefinition ammoHandgun, ammoShotgun, ammoSmg, ammoRifle, ammoRocket, ammoMagnum, ammoSniper;
             public ItemDefinition herbGreen, herbRed, herbGG, herbGR, spray;
-            public ItemDefinition itemPistol, itemPistol2, itemShotgun, itemSmg, itemRifle, itemRocket, itemMagnum;
+            public ItemDefinition itemPistol, itemPistol2, itemShotgun, itemSmg, itemRifle, itemRocket, itemMagnum, itemSniper;
             public ItemDefinition pesetas;
-            public ItemDefinition gunpowder, resourceS, resourceL, elenaPendant;
+            public ItemDefinition gunpowder, resourceS, resourceL, elenaPendant, dogtag;
             public List<ItemDefinition> treasures = new List<ItemDefinition>();
             public List<ItemDefinition> documents = new List<ItemDefinition>();
             public List<CraftRecipe> recipes = new List<CraftRecipe>();
             public List<ItemDefinition> shopStock = new List<ItemDefinition>();
-            public WeaponDefinition pistol, pistol2, shotgun, smg, rifle, rocket, magnum;
+            public WeaponDefinition pistol, pistol2, shotgun, smg, rifle, rocket, magnum, sniper;
         }
 
         public static Database Build()
@@ -46,8 +46,9 @@ namespace LevelSetup.RE4Tools
             // --------------------------------------------------------- Municion
             db.ammoHandgun = Item("Ammo_Handgun", "ammo_handgun", "Balas de pistola", "Munición de 9 mm para pistolas.", ItemType.Ammo, new Vector2Int(1, 1), 50, new Color(0.55f, 0.45f, 0.18f), "9mm");
             db.ammoShotgun = Item("Ammo_Shotgun", "ammo_shotgun", "Cartuchos de escopeta", "Cartuchos del calibre 12.", ItemType.Ammo, new Vector2Int(2, 1), 15, new Color(0.62f, 0.16f, 0.1f), "Cartuchos");
-            db.ammoSmg = Item("Ammo_SMG", "ammo_smg", "Munición de subfusil", "Cargadores para el subfusil TMP.", ItemType.Ammo, new Vector2Int(2, 1), 120, new Color(0.22f, 0.32f, 0.5f), "TMP");
+            db.ammoSmg = Item("Ammo_SMG", "ammo_smg", "Munición de subfusil", "Cargadores de 9 mm para el subfusil.", ItemType.Ammo, new Vector2Int(2, 1), 120, new Color(0.22f, 0.32f, 0.5f), "9mm MP");
             db.ammoRifle = Item("Ammo_Rifle", "ammo_rifle", "Balas 7.62 mm", "Munición 7.62 mm para el rifle de asalto AK-47.", ItemType.Ammo, new Vector2Int(2, 1), 90, new Color(0.3f, 0.45f, 0.22f), "7.62");
+            db.ammoSniper = Item("Ammo_Sniper", "ammo_sniper", "Balas de francotirador", "Munición 7.92 mm de gran potencia para el rifle de cerrojo.", ItemType.Ammo, new Vector2Int(2, 1), 20, new Color(0.45f, 0.38f, 0.25f), "7.92");
             db.ammoMagnum = Item("Ammo_Magnum", "ammo_magnum", "Balas Magnum", "Munición de gran calibre para el revólver.", ItemType.Ammo, new Vector2Int(2, 1), 12, new Color(0.6f, 0.48f, 0.2f), "Magnum");
             db.pesetas = Item("Pesetas", "pesetas", "Pesetas", "Dinero. El mercader lo acepta a cambio de mejoras.", ItemType.Money, new Vector2Int(1, 1), 999999, new Color(0.85f, 0.68f, 0.2f), "₧");
             db.ammoRocket = Item("Ammo_Rocket", "ammo_rocket", "Cohete", "Proyectil explosivo para el lanzacohetes.", ItemType.Ammo, new Vector2Int(3, 1), 2, new Color(0.42f, 0.4f, 0.18f), "Cohete");
@@ -87,7 +88,15 @@ namespace LevelSetup.RE4Tools
             db.pistol2.upgradeBaseCost = 4000; db.pistol2.capacityPerLevel = 2;
             db.pistol2.ammoItem = db.ammoHandgun;
 
-            db.shotgun = Weapon("Weapon_Shotgun", "shotgun", "Escopeta W-870", WeaponClass.Shotgun, KevinWeapons + "Human_Rifle.prefab", 0.9f, Vector3.zero);
+            // Escopeta y subfusil: modelos de CASTLE BRAVO preparados por RE4WeaponBuilder (antes, los de
+            // Kevin Iglesias salian mal orientados y de tamaño erroneo). Si faltan, se usan los antiguos.
+            bool newShotgun = AssetDatabase.LoadAssetAtPath<GameObject>(RE4WeaponBuilder.ShotgunPrefabPath) != null;
+            bool newSmg = AssetDatabase.LoadAssetAtPath<GameObject>(RE4WeaponBuilder.SmgPrefabPath) != null;
+
+            db.shotgun = Weapon("Weapon_Shotgun", "shotgun", "Escopeta W-870", WeaponClass.Shotgun,
+                newShotgun ? RE4WeaponBuilder.ShotgunPrefabPath : KevinWeapons + "Human_Rifle.prefab", 0.9f, Vector3.zero);
+            if (newShotgun) { Animated(db.shotgun, 0.12f, false); db.shotgun.magazinePart = ""; }
+            else db.shotgun.canonicalModel = false;
             db.shotgun.damage = 19f; db.shotgun.pellets = 8; db.shotgun.magazineSize = 6; db.shotgun.fireInterval = 0.95f; db.shotgun.reloadTime = 3.3f;
             db.shotgun.reloadOneByOne = true; db.shotgun.cycleAfterShot = true; db.shotgun.range = 35f;
             db.shotgun.hipSpread = 4f; db.shotgun.aimSpread = 2f; db.shotgun.aimFov = 58f; db.shotgun.headMultiplier = 1.6f;
@@ -96,7 +105,10 @@ namespace LevelSetup.RE4Tools
             db.shotgun.hipPosition = new Vector3(0.17f, -0.17f, 0.42f); db.shotgun.aimPosition = new Vector3(0f, -0.1f, 0.36f);
             db.shotgun.ammoItem = db.ammoShotgun;
 
-            db.smg = Weapon("Weapon_SMG", "smg", "Subfusil TMP", WeaponClass.SMG, KevinWeapons + "Human_AssaultRifle.prefab", 0.6f, Vector3.zero);
+            db.smg = Weapon("Weapon_SMG", "smg", "Subfusil MP", WeaponClass.SMG,
+                newSmg ? RE4WeaponBuilder.SmgPrefabPath : KevinWeapons + "Human_AssaultRifle.prefab", 0.62f, Vector3.zero);
+            if (newSmg) Animated(db.smg, 0.14f, false);
+            else db.smg.canonicalModel = false;
             db.smg.damage = 14f; db.smg.magazineSize = 40; db.smg.fireInterval = 0.075f; db.smg.automatic = true; db.smg.reloadTime = 1.9f;
             db.smg.hipSpread = 4f; db.smg.aimSpread = 1.1f; db.smg.aimFov = 58f; db.smg.headMultiplier = 2.2f;
             db.smg.recoilKickBack = 0.03f; db.smg.recoilPitch = 1.1f; db.smg.recoilYaw = 0.8f; db.smg.cameraPitchKick = 0.45f; db.smg.staggerPower = 0.15f;
@@ -115,6 +127,22 @@ namespace LevelSetup.RE4Tools
             db.rifle.hipPosition = new Vector3(0.17f, -0.17f, 0.42f); db.rifle.aimPosition = new Vector3(0f, -0.1f, 0.3f);
             db.rifle.upgradeBaseCost = 6000; db.rifle.capacityPerLevel = 5;
             db.rifle.ammoItem = db.ammoRifle;
+
+            // Rifle de francotirador (cerrojo + mira de largo alcance): lento, letal y atraviesa enemigos
+            bool hasSniper = AssetDatabase.LoadAssetAtPath<GameObject>(RE4WeaponBuilder.SniperPrefabPath) != null;
+            db.sniper = Weapon("Weapon_Sniper", "sniper", "Rifle de francotirador", WeaponClass.Rifle,
+                hasSniper ? RE4WeaponBuilder.SniperPrefabPath : RE4WeaponBuilder.Folder + "/Rifle_AK47.prefab", 1.05f, Vector3.zero);
+            Animated(db.sniper, 0.11f, false);
+            db.sniper.magazinePart = "";
+            db.sniper.useScopeOverlay = true;
+            db.sniper.damage = 150f; db.sniper.pellets = 1; db.sniper.magazineSize = 5; db.sniper.fireInterval = 1.15f; db.sniper.automatic = false; db.sniper.reloadTime = 2.9f;
+            db.sniper.cycleAfterShot = true; db.sniper.reloadOneByOne = false; db.sniper.penetration = 3; db.sniper.range = 250f;
+            db.sniper.hipSpread = 7f; db.sniper.aimSpread = 0.02f; db.sniper.aimFov = 14f; db.sniper.aimTime = 0.32f; db.sniper.headMultiplier = 4f; db.sniper.limbMultiplier = 0.8f;
+            db.sniper.recoilKickBack = 0.1f; db.sniper.recoilPitch = 6.5f; db.sniper.recoilYaw = 0.8f; db.sniper.cameraPitchKick = 3.5f; db.sniper.staggerPower = 1f; db.sniper.knockback = 1.1f;
+            db.sniper.shotPitch = 0.85f; db.sniper.shotBody = 1.5f; db.sniper.shotLength = 1.1f; db.sniper.noiseRadius = 85f;
+            db.sniper.hipPosition = new Vector3(0.17f, -0.17f, 0.45f); db.sniper.aimPosition = new Vector3(0f, -0.1f, 0.3f);
+            db.sniper.upgradeBaseCost = 7000; db.sniper.capacityPerLevel = 1;
+            db.sniper.ammoItem = db.ammoSniper;
 
             // Lanzacohetes de 4 tubos (modelo importado); si no esta, el bazuca de Kevin Iglesias
             bool newLauncher = AssetDatabase.LoadAssetAtPath<GameObject>(RE4WeaponBuilder.Folder + "/Lanzacohetes.prefab") != null;
@@ -150,6 +178,7 @@ namespace LevelSetup.RE4Tools
             db.itemRifle = WeaponItem("Item_Rifle", db.rifle, new Vector2Int(7, 2), new Color(0.3f, 0.35f, 0.24f), "Fusil de asalto AK-47 con mira. Fuego automático, cargador de 30 balas.");
             db.itemMagnum = WeaponItem("Item_Magnum", db.magnum, new Vector2Int(4, 2), new Color(0.32f, 0.3f, 0.3f), "Revólver Magnum. Seis balas que lo atraviesan todo. Ideal contra el Tyrant.");
             db.itemRocket = WeaponItem("Item_Rocket", db.rocket, new Vector2Int(7, 2), new Color(0.35f, 0.33f, 0.18f), "Lanzacohetes. Un solo disparo arrasa con todo.");
+            db.itemSniper = WeaponItem("Item_Sniper", db.sniper, new Vector2Int(8, 2), new Color(0.28f, 0.24f, 0.18f), "Rifle de cerrojo con mira de largo alcance. Cinco balas que atraviesan varios enemigos.\nMantén clic derecho para mirar por la mira.");
 
             BuildStoryItems(db);
 
@@ -164,8 +193,10 @@ namespace LevelSetup.RE4Tools
             WorldModel(db.ammoSmg, props.ammoSmg, 0.16f);
             WorldModel(db.ammoRifle, props.ammoRifle, 0.18f);
             WorldModel(db.ammoMagnum, props.ammoMagnum, 0.14f);
+            WorldModel(db.ammoSniper, props.ammoSniper, 0.16f);
+            WorldModel(db.dogtag, AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Low Poly Weapon Pack 4_WWII_1/Prefabs/Items/WWII_Dogtag_A.prefab"), 0.12f);
 
-            foreach (var w in new[] { db.pistol, db.pistol2, db.shotgun, db.smg, db.rifle, db.rocket, db.magnum })
+            foreach (var w in new[] { db.pistol, db.pistol2, db.shotgun, db.smg, db.rifle, db.rocket, db.magnum, db.sniper })
             {
                 if (!w.canonicalModel) w.modelEulerOffset = RE4EditorUtil.ComputeWeaponOrientation(w.viewModelPrefab, w.modelEulerOffset);
                 EditorUtility.SetDirty(w);
@@ -232,6 +263,8 @@ namespace LevelSetup.RE4Tools
             db.treasures.Add(Treasure("Tesoro_Perla", "perla_negra", "Perla negra", "Una perla oscura y pesada.", 5000));
             db.treasures.Add(Treasure("Tesoro_Colgante", "colgante_rubi", "Colgante de rubí", "Joya antigua de la familia del alcalde.", 7500));
             db.treasures.Add(Treasure("Tesoro_Caliz", "caliz", "Cáliz de la Hermandad", "Cáliz de oro con restos de un líquido negro.", 12000));
+            // Placa de los agentes desaparecidos (control abandonado): solo se vende, no la sueltan los enemigos
+            db.dogtag = Treasure("Tesoro_Placa", "placa_agente", "Placa de identificación", "Placa de uno de los agentes que entraron antes que tú. El nombre está rayado a cuchillo.", 5000);
 
             db.elenaPendant = Item("Clave_Colgante", "colgante_elena", "Colgante de Elena", "El colgante de Elena Ibarra. Tiene algo grabado en el reverso.", ItemType.Key, new Vector2Int(1, 1), 1, new Color(0.8f, 0.7f, 0.3f), "Elena");
 
@@ -277,6 +310,7 @@ namespace LevelSetup.RE4Tools
             db.recipes.Add(Recipe(db.ammoSmg, 30, db.gunpowder, 2, null, 0));
             db.recipes.Add(Recipe(db.ammoRifle, 15, db.gunpowder, 2, db.resourceS, 1));
             db.recipes.Add(Recipe(db.ammoMagnum, 3, db.gunpowder, 2, db.resourceL, 1));
+            db.recipes.Add(Recipe(db.ammoSniper, 4, db.gunpowder, 2, db.resourceL, 1));
             db.recipes.Add(Recipe(db.ammoRocket, 1, db.resourceL, 3, db.gunpowder, 4));
 
             // Tienda del mercader
@@ -287,8 +321,15 @@ namespace LevelSetup.RE4Tools
             db.itemRifle.buyPrice = 30000;
             db.itemMagnum.buyPrice = 35000;
             db.itemRocket.buyPrice = 30000;
-            db.shopStock = new List<ItemDefinition> { db.spray, db.herbGreen, db.resourceL, db.itemShotgun, db.itemSmg, db.itemRifle, db.itemMagnum, db.itemRocket };
-            foreach (var it in new[] { db.spray, db.herbGreen, db.resourceL, db.itemShotgun, db.itemSmg, db.itemRifle, db.itemMagnum, db.itemRocket }) EditorUtility.SetDirty(it);
+            db.itemSniper.buyPrice = 26000;
+            db.ammoHandgun.buyPrice = 800;
+            db.ammoShotgun.buyPrice = 1500;
+            db.ammoSniper.buyPrice = 2000;
+            db.ammoHandgun.buyAmount = 20; db.ammoShotgun.buyAmount = 6; db.ammoSniper.buyAmount = 5;
+            // El mercader tambien vende algo de municion (RE4 Remake): para no quedarse nunca sin balas
+            db.shopStock = new List<ItemDefinition> { db.spray, db.herbGreen, db.resourceL, db.ammoHandgun, db.ammoShotgun, db.ammoSniper,
+                db.itemShotgun, db.itemSmg, db.itemRifle, db.itemSniper, db.itemMagnum, db.itemRocket };
+            foreach (var it in db.shopStock) EditorUtility.SetDirty(it);
         }
 
         private static ItemDefinition Treasure(string file, string id, string name, string desc, int price)

@@ -30,6 +30,14 @@ namespace LevelSetup.RE4Tools
         public const string RevolverCylinder = "A1c_Barrel_center__rotate";
         public static GameObject RiflePrefab => AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "/Rifle_AK47.prefab");
 
+        // Modelos de CASTLE BRAVO (Low Poly ShotGun Pack 1 y Low Poly Weapon Pack 4 WWII)
+        public const string ShotgunSource = "Assets/Low Poly ShotGun Weapon Pack 1/Prefabs/Weapons/ShotGun_A.prefab";
+        public const string SmgSource = "Assets/Low Poly Weapon Pack 4_WWII_1/Prefabs/Weapons/WWII_SMG_A.prefab";
+        public const string SniperSource = "Assets/Low Poly Weapon Pack 4_WWII_1/Prefabs/Weapons/Weapons_PreSet/WWII_Recon_A_PreSet.prefab";
+        public const string ShotgunPrefabPath = Folder + "/Escopeta_W870.prefab";
+        public const string SmgPrefabPath = Folder + "/Subfusil_MP.prefab";
+        public const string SniperPrefabPath = Folder + "/Rifle_Francotirador.prefab";
+
         public static void BuildAll()
         {
             RE4EditorUtil.EnsureFolder(MeshFolder);
@@ -40,6 +48,9 @@ namespace LevelSetup.RE4Tools
             Safe("AK-47", BuildRifle);
             Safe("Revolver", BuildRevolver);
             Safe("Lanzacohetes", BuildLauncher);
+            Safe("Escopeta", BuildShotgun);
+            Safe("Subfusil", BuildSmg);
+            Safe("Francotirador", BuildSniper);
             AssetDatabase.SaveAssets();
         }
 
@@ -338,6 +349,62 @@ namespace LevelSetup.RE4Tools
             // Los cohetes asoman por delante; el gatillo marca la empunadura; el modelo ya viene de pie
             Finish(root, model, new List<Transform>(), new List<Transform>(), Find(model, "Rockets"), null,
                 Folder + "/Lanzacohetes.prefab", Find(model, "Aim"), Find(model, "Trigger"), true);
+        }
+
+        // =========================================================== Escopeta, subfusil y francotirador (CASTLE BRAVO)
+
+        /// <summary>Busca piezas cuyo nombre termina en alguno de los sufijos (ShotGun_A_Bolt, WWII_SMG_A_Mag...).</summary>
+        private static List<Transform> FindSuffix(GameObject model, params string[] suffixes)
+        {
+            var list = new List<Transform>();
+            foreach (var t in model.GetComponentsInChildren<Transform>(true))
+                foreach (var s in suffixes)
+                    if (t.name.EndsWith(s) && !list.Contains(t)) list.Add(t);
+            return list;
+        }
+
+        private static List<Transform> FindContains(GameObject model, string part)
+        {
+            var list = new List<Transform>();
+            foreach (var t in model.GetComponentsInChildren<Transform>(true))
+                if (t.name.Contains(part) && t.GetComponent<Renderer>() != null) list.Add(t);
+            return list;
+        }
+
+        /// <summary>Escopeta de corredera: el cerrojo retrocede al bombear; empuñadura en el gatillo.</summary>
+        private static void BuildShotgun()
+        {
+            GameObject src = AssetDatabase.LoadAssetAtPath<GameObject>(ShotgunSource);
+            if (src == null) { Debug.LogWarning("[RE4] Falta " + ShotgunSource); return; }
+            GameObject root = new GameObject("Escopeta_W870");
+            GameObject model = Wrap(root, src);
+            Finish(root, model, FindSuffix(model, "_Bolt"), new List<Transform>(), FindSuffix(model, "_Barrel"),
+                FindSuffix(model, "_Sight_Forward", "_Sight_Back"), ShotgunPrefabPath,
+                FindSuffix(model, "_Sight_Back", "_Sight_Forward"), FindSuffix(model, "_Trigger"));
+        }
+
+        /// <summary>Subfusil: cerrojo y cargador animados.</summary>
+        private static void BuildSmg()
+        {
+            GameObject src = AssetDatabase.LoadAssetAtPath<GameObject>(SmgSource);
+            if (src == null) { Debug.LogWarning("[RE4] Falta " + SmgSource); return; }
+            GameObject root = new GameObject("Subfusil_MP");
+            GameObject model = Wrap(root, src);
+            Finish(root, model, FindSuffix(model, "_Bolt"), FindSuffix(model, "_Mag"), FindSuffix(model, "_Barrel"),
+                FindSuffix(model, "_Sight"), SmgPrefabPath, FindSuffix(model, "_Sight"));
+        }
+
+        /// <summary>Rifle de cerrojo con mira de largo alcance: el cerrojo se acciona tras cada disparo.</summary>
+        private static void BuildSniper()
+        {
+            GameObject src = AssetDatabase.LoadAssetAtPath<GameObject>(SniperSource);
+            if (src == null) { Debug.LogWarning("[RE4] Falta " + SniperSource); return; }
+            GameObject root = new GameObject("Rifle_Francotirador");
+            GameObject model = Wrap(root, src);
+            List<Transform> optic = FindContains(model, "Optic");
+            if (optic.Count == 0) optic = FindSuffix(model, "_Sight");
+            Finish(root, model, FindSuffix(model, "_Bolt", "_Bolt_Part"), new List<Transform>(), FindSuffix(model, "_Barrel"),
+                optic, SniperPrefabPath, optic, FindSuffix(model, "_Trigger"));
         }
 
         private static void AssignByName(GameObject model, System.Func<string, Material> pick)
