@@ -112,6 +112,8 @@ namespace Gameplay
         private bool _female;
         private float _voicePitch = 1f;
         private AudioSource _speech;
+        private AudioDistortionFilter _speechDistortion;
+        private AudioLowPassFilter _speechLowPass;
 
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
         private static readonly int AttackHash = Animator.StringToHash("Attack");
@@ -168,8 +170,10 @@ namespace Gameplay
             _speech.maxDistance = 32f;
             _speech.minDistance = 2.5f;
             _speech.playOnAwake = false;
-            speech.AddComponent<AudioDistortionFilter>().distortionLevel = 0.55f;
-            speech.AddComponent<AudioLowPassFilter>().cutoffFrequency = 4200f;
+            _speechDistortion = speech.AddComponent<AudioDistortionFilter>();
+            _speechDistortion.distortionLevel = 0.55f;
+            _speechLowPass = speech.AddComponent<AudioLowPassFilter>();
+            _speechLowPass.cutoffFrequency = 4200f;
 
             // Voz de los gritos: mujer si el modelo es femenino
             bool female = false;
@@ -487,9 +491,15 @@ namespace Gameplay
             float d = to.magnitude;
             float angle = Vector3.Angle(transform.forward, to);
             // De cerca lo notan, salvo que Leon se acerque despacio por la espalda (sigilo)
-            bool sneaking = FirstPersonController.Instance != null && !FirstPersonController.Instance.IsSprinting;
-            if (d < closeSenseRange && (angle < 110f || !sneaking || d < 0.9f)) return true;
-            if (d > sightRange) return false;
+            var fps = FirstPersonController.Instance;
+            bool sneaking = fps != null && !fps.IsSprinting;
+            // Agachado: se le oye menos de cerca y se le ve mas tarde (y la cabeza queda mas baja)
+            float crouch = fps != null ? fps.CrouchBlend : 0f;
+            float close = closeSenseRange * Mathf.Lerp(1f, 0.45f, crouch);
+            float sight = sightRange * Mathf.Lerp(1f, 0.6f, crouch);
+            if (crouch > 0.01f) to = (_player.position + Vector3.up * Mathf.Lerp(1.5f, 0.9f, crouch)) - eye;
+            if (d < close && (angle < 110f || !sneaking || d < 0.9f)) return true;
+            if (d > sight) return false;
             if (angle > sightAngle) return false;
             if (Physics.Raycast(eye, to.normalized, out RaycastHit hit, d, RE4Layers.ShotMask, QueryTriggerInteraction.Ignore))
             {
@@ -1030,7 +1040,11 @@ namespace Gameplay
             if (heavy || _speech == null || _speech.isPlaying) return false;
             AudioClip c = VillagerBarks.Pick(set, _barkVoice);
             if (c == null) return false;
-            _speech.pitch = _voicePitch * Random.Range(0.92f, 0.98f);
+            // las frases grabadas (ElevenLabs) ya suenan rasposas: el filtro solo ensucia la voz de Windows
+            bool recorded = !c.name.StartsWith("Voz_"); // las de Windows se crean como "Voz_<id>" en NpcVoice.WavToClip
+            if (_speechDistortion != null) _speechDistortion.enabled = !recorded;
+            if (_speechLowPass != null) _speechLowPass.enabled = !recorded;
+            _speech.pitch = recorded ? Random.Range(0.97f, 1.03f) : _voicePitch * Random.Range(0.92f, 0.98f);
             _speech.PlayOneShot(c, 1f);
             AudioClip under = GanadoVoices.Pick(GanadoSound.Grunt, _female);
             if (under != null && _voice != null)
@@ -1045,10 +1059,11 @@ namespace Gameplay
         private void Ganado(GanadoSound kind, float volume, AudioClip fallback)
         {
             if (_voice == null) return;
-            AudioClip c = GanadoVoices.Pick(kind == GanadoSound.Pant ? GanadoSound.Grunt : kind, _female);
+            AudioClip c = GanadoVoices.Pick(kind, _female, heavy);
             if (c == null) { PlayVoice(fallback, volume); return; }
-            // el Tyrant: la misma garganta pero enorme
-            _voice.pitch = heavy ? Random.Range(0.5f, 0.6f) : _voicePitch * Random.Range(0.95f, 1.05f);
+            // el Tyrant: sus rugidos propios casi sin tocar; si no hay, la misma garganta pero enorme
+            bool bossClip = c.name.StartsWith("Jefe_");
+            _voice.pitch = bossClip ? Random.Range(0.92f, 1.04f) : heavy ? Random.Range(0.5f, 0.6f) : _voicePitch * Random.Range(0.95f, 1.05f);
             _voice.PlayOneShot(c, volume);
         }
 
@@ -1057,7 +1072,7 @@ namespace Gameplay
             if (_voice == null || clip == null) return;
             _voice.pitch = Random.Range(0.85f, 1.1f);
             _voice.PlayOneShot(clip, volume);
-        }
+        }
 
         /// <summary>Indica si el aldeano ya ha detectado a Leon y participa activamente en el combate.</summary>
         public bool IsAlertedAndAlive => !IsDead && State != GanadoState.Idle;

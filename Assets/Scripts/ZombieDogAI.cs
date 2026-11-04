@@ -185,7 +185,7 @@ namespace Gameplay
             {
                 bool active = State != DogState.Idle;
                 _nextGrowl = Time.time + (active ? Random.Range(1.5f, 4f) : Random.Range(5f, 11f));
-                PlayVoice(ProceduralAudio.Growl(Random.Range(0, 6)), active ? 0.6f : 0.3f, 1.35f);
+                DogVoice("Perro_Grunido", ProceduralAudio.Growl(Random.Range(0, 6)), active ? 0.6f : 0.3f, 1.35f);
             }
         }
 
@@ -220,8 +220,9 @@ namespace Gameplay
             Vector3 target = _player.position + Vector3.up * 1.2f;
             Vector3 to = target - eye;
             float d = to.magnitude;
-            if (d < closeSenseRange) return true;
-            if (d > sightRange || Vector3.Angle(transform.forward, to) > 100f) return false;
+            float crouch = FirstPersonController.Instance != null ? FirstPersonController.Instance.CrouchBlend : 0f;
+            if (d < closeSenseRange * Mathf.Lerp(1f, 0.6f, crouch)) return true; // el olfato del perro engaña menos
+            if (d > sightRange * Mathf.Lerp(1f, 0.75f, crouch) || Vector3.Angle(transform.forward, to) > 100f) return false;
             if (Physics.Raycast(eye, to.normalized, out RaycastHit hit, d, RE4Layers.ShotMask, QueryTriggerInteraction.Ignore))
                 return hit.transform == _player || hit.transform.IsChildOf(_player);
             return true;
@@ -237,7 +238,7 @@ namespace Gameplay
             if (State != DogState.Idle || IsDead) return;
             Enter(DogState.Chase);
             SetStopped(false);
-            PlayVoice(ProceduralAudio.Scream(), 0.55f, 1.6f);
+            DogVoice("Perro_Ladrido", ProceduralAudio.Scream(), 0.55f, 1.6f);
             foreach (var other in All)
             {
                 if (other != this && other.State == DogState.Idle && (other.transform.position - transform.position).sqrMagnitude < 30f * 30f) other.Alert();
@@ -315,7 +316,7 @@ namespace Gameplay
         {
             Enter(DogState.Crouch);
             SetStopped(true);
-            PlayVoice(ProceduralAudio.Growl(Random.Range(0, 6)), 0.8f, 1.5f);
+            DogVoice("Perro_Grunido", ProceduralAudio.Growl(Random.Range(0, 6)), 0.8f, 1.5f);
         }
 
         private void UpdateCrouch()
@@ -330,7 +331,7 @@ namespace Gameplay
             to.y = 0f;
             float travel = Mathf.Min(to.magnitude + 0.4f, pounceMaxRange + 1f);
             _leapTarget = transform.position + to.normalized * travel;
-            PlayVoice(ProceduralAudio.Scream(), 0.7f, 1.7f);
+            DogVoice("Perro_Ataque", ProceduralAudio.Scream(), 0.7f, 1.7f);
         }
 
         private void UpdateLeap()
@@ -358,7 +359,7 @@ namespace Gameplay
         {
             Enter(DogState.Bite);
             SetStopped(true);
-            PlayVoice(ProceduralAudio.Growl(Random.Range(0, 6)), 0.9f, 1.6f);
+            DogVoice("Perro_Ataque", ProceduralAudio.Growl(Random.Range(0, 6)), 0.9f, 1.6f);
         }
 
         private void UpdateBite()
@@ -413,7 +414,7 @@ namespace Gameplay
             if (IsDead) return;
             if (State == DogState.Idle) Alert();
             _hit = 1f;
-            PlayVoice(ProceduralAudio.Scream(), 0.6f, 1.9f);
+            DogVoice("Perro_Dolor", ProceduralAudio.Scream(), 0.6f, 1.9f);
 
             // Un buen impacto lo saca del salto o de la carrera
             if (State != DogState.Leap && Random.value < info.staggerPower + 0.25f)
@@ -443,8 +444,16 @@ namespace Gameplay
             }
             _agent.enabled = false;
             if (_body != null) _body.enabled = false;
-            PlayVoice(ProceduralAudio.Growl(7), 0.8f, 1.5f);
+            DogVoice("Perro_Muerte", ProceduralAudio.Growl(7), 0.8f, 1.5f);
             CorpseVanish.Begin(gameObject, 3f, 1.5f);
+        }
+
+        /// <summary>Sonido grabado del perro (Resources/RE4Audio/Perro, ElevenLabs) o el procedimental si falta.</summary>
+        private void DogVoice(string key, AudioClip fallback, float volume, float fallbackPitch)
+        {
+            AudioClip c = BundledAudio.Pick("Perro", key);
+            if (c != null) PlayVoice(c, Mathf.Min(1f, volume + 0.15f), 1f);
+            else PlayVoice(fallback, volume, fallbackPitch);
         }
 
         private void PlayVoice(AudioClip clip, float volume, float pitch)
@@ -542,7 +551,7 @@ namespace Gameplay
         {
             if (bone == null || !_bind.TryGetValue(bone, out Quaternion b)) return;
             bone.localRotation = b * Quaternion.Euler(x, y, z);
-        }
+        }
 
         /// <summary>Indica si el perro zombi ya descubrió al jugador y está en combate activo.</summary>
         public bool IsAggressive => !IsDead && State != DogState.Idle;
