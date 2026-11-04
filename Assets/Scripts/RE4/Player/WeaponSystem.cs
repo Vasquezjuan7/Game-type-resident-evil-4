@@ -99,6 +99,7 @@ namespace Gameplay.RE4
         private float _knifePressTime = -10f;
         private bool _guardShown;
         private bool _wasAiming;
+        private bool _aimToggled;
         private bool _triggerHeldLastFrame;
         private bool _hideWeapon;
 
@@ -408,6 +409,15 @@ namespace Gameplay.RE4
 
             // Apuntar
             bool aimHeld = (mouse != null && mouse.rightButton.isPressed) || (pad != null && pad.leftTrigger.isPressed);
+            // Opciones › Accesibilidad › Apuntar: "Pulsar" alterna en vez de mantener
+            if (DeadEcho.Core.SettingsService.Current.holdToToggle)
+            {
+                if ((mouse != null && mouse.rightButton.wasPressedThisFrame) || (pad != null && pad.leftTrigger.wasPressedThisFrame))
+                    _aimToggled = !_aimToggled;
+                if (Current == null) _aimToggled = false;
+                aimHeld = _aimToggled;
+            }
+            else _aimToggled = false;
             IsAiming = aimHeld && Current != null && !IsBusy;
             if (_fps != null) _fps.IsAiming = IsAiming;
 
@@ -578,6 +588,9 @@ namespace Gameplay.RE4
                 float speed = new Vector3(_fps.Velocity.x, 0f, _fps.Velocity.z).magnitude;
                 spread += speed * (IsAiming ? 0.25f : 0.6f);
                 if (!_fps.IsGrounded) spread += 3f;
+                // Cansado tiembla el pulso; agachado se apunta mas estable
+                spread += _fps.Fatigue * (IsAiming ? 1.6f : 2.4f);
+                spread *= Mathf.Lerp(1f, 0.8f, _fps.CrouchBlend);
             }
             return spread;
         }
@@ -613,6 +626,14 @@ namespace Gameplay.RE4
                     if (crate != null)
                     {
                         crate.Hit(damage, hit.point, dir);
+                        end = hit.point;
+                        break;
+                    }
+
+                    FarmAnimal animal = hit.collider.GetComponentInParent<FarmAnimal>();
+                    if (animal != null)
+                    {
+                        animal.Hit(damage, hit.point, dir);
                         end = hit.point;
                         break;
                     }
@@ -1338,7 +1359,10 @@ namespace Gameplay.RE4
             Vector3 pos = Vector3.Lerp(hip, aim, aimK);
             pos += new Vector3(-0.04f, -0.05f, -0.03f) * _sprintBlend;
             pos += new Vector3(0f, -0.35f, -0.05f) * (1f - _equipBlend);
-            pos += swayPos + bob + new Vector3(0f, breathe, 0f) + _animPos + _recoilPos * 0.01f;
+            // Pulso cansado: el arma se mueve al ritmo del jadeo (visible al apuntar)
+            float tired = _fps != null ? _fps.Fatigue : 0f;
+            Vector3 tiredSway = new Vector3(Mathf.Sin(Time.time * 2.7f) * 0.006f, Mathf.Sin(Time.time * 3.4f + 1f) * 0.008f, 0f) * tired;
+            pos += swayPos + bob + new Vector3(0f, breathe, 0f) + tiredSway + _animPos + _recoilPos * 0.01f;
 
             Vector3 rot = sprintRot * _sprintBlend + new Vector3(35f, -10f, 0f) * (1f - _equipBlend) + swayRot + bobRot + _animRot + _recoilRot * 0.01f;
 
