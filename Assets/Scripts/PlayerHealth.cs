@@ -69,6 +69,7 @@ namespace Gameplay
         public void TakeDamage(float amount, Vector3 fromPosition)
         {
             if (IsDead || amount <= 0f) return;
+            amount *= DeadEcho.Core.GameSession.DamageTakenMultiplier; // dificultad de Nueva partida (×0.5 / ×1 / ×1.5)
             if (Time.time - LastHitTime < invulnerableAfterHit && !IsGrabbed) return;
 
             LastHitTime = Time.time;
@@ -84,6 +85,7 @@ namespace Gameplay
                 _fps.Push(push.normalized * 2f);
             }
             ProceduralAudio.PlayAt(ProceduralAudio.Impact(1.2f), transform.position + Vector3.up, 0.8f);
+            if (currentHealth > 0f) LeonGrunt("Leon_Dolor", 0.8f);
 
             if (currentHealth <= 0f) Die();
         }
@@ -252,7 +254,20 @@ namespace Gameplay
                 _fps.LockCursor(false);
                 if (_fps.cameraHolder != null) StartCoroutine(FallCamera(_fps.cameraHolder));
             }
-            ProceduralAudio.PlayAt(ProceduralAudio.Scream(), transform.position, 0.6f, 0f);
+            if (!LeonGrunt("Leon_Muerte", 1f)) ProceduralAudio.PlayAt(ProceduralAudio.Scream(), transform.position, 0.6f, 0f);
+        }
+
+        private float _nextGrunt;
+
+        /// <summary>Quejido de Leon grabado (Resources/RE4Audio/Leon, ElevenLabs). false si no hay clip.</summary>
+        private bool LeonGrunt(string key, float volume)
+        {
+            if (key == "Leon_Dolor" && Time.time < _nextGrunt) return false;
+            AudioClip c = BundledAudio.Pick("Leon", key);
+            if (c == null) return false;
+            _nextGrunt = Time.time + 0.8f;
+            ProceduralAudio.PlayAt(c, transform.position + Vector3.up * 1.6f, volume, 0.03f);
+            return true;
         }
 
         private System.Collections.IEnumerator FallCamera(Transform holder)
@@ -266,7 +281,7 @@ namespace Gameplay
                 holder.localPosition = Vector3.Lerp(start, end, Mathf.SmoothStep(0f, 1f, t));
                 yield return null;
             }
-        }
+        }
 
         /// <summary>Restaura la salud de Leon al máximo permitido si sigue con vida.</summary>
         public bool IsCritical => !IsDead && Status == HealthStatus.Danger;

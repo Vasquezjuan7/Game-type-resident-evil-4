@@ -80,12 +80,20 @@ namespace Gameplay
             Instance = this;
             // mas presion y botin algo mas escaso (los valores guardados en la escena eran los antiguos)
             maxAlive = Mathf.Max(maxAlive, 18);
-            dropChance = Mathf.Min(dropChance, 0.42f);
+            dropChance = Mathf.Clamp(dropChance, 0.5f, 0.55f); // mas botin: mas balas que conseguir
         }
 
         private void Start()
         {
             if (PlayerHealth.Instance != null) _player = PlayerHealth.Instance.transform;
+            // partida guardada despues del asedio: la campana ya sono y los aldeanos se retiraron
+            if (DeadEcho.Core.GameSession.IsRestoring && DeadEcho.Core.GameSession.RestoreSiegeWon)
+            {
+                Victory = true;
+                Kills = DeadEcho.Core.GameSession.RestoreKills;
+                return;
+            }
+            if (DeadEcho.Core.GameSession.IsRestoring) Kills = DeadEcho.Core.GameSession.RestoreKills;
             SpawnVillagers();
             StartCoroutine(WatchForDiscovery());
         }
@@ -360,8 +368,18 @@ namespace Gameplay
             if (owned.Count == 0) owned.AddRange(ammoDrops);
             if (owned.Count == 0) return;
 
+            // Como en RE4: suele soltar la municion que menos te queda
             ItemDefinition ammo = owned[Random.Range(0, owned.Count)];
-            int amount = Mathf.Max(1, Mathf.RoundToInt(ammo.maxStack * Random.Range(0.12f, 0.25f)));
+            if (attache != null && owned.Count > 1 && Random.value < 0.65f)
+            {
+                float best = float.MaxValue;
+                foreach (var a in owned)
+                {
+                    float ratio = attache.CountItem(a) / (float)Mathf.Max(1, a.maxStack);
+                    if (ratio < best) { best = ratio; ammo = a; }
+                }
+            }
+            int amount = Mathf.Max(1, Mathf.RoundToInt(ammo.maxStack * Random.Range(0.15f, 0.3f)));
             Spawn(ammo, amount, at);
         }
 
@@ -388,7 +406,7 @@ namespace Gameplay
                 ProceduralAudio.PlayAt(ProceduralAudio.Bell(), bellPos, 1f, 0f, 400f);
                 yield return new WaitForSeconds(2.2f);
             }
-        }
+        }
 
         /// <summary>Progreso normalizado (0..1) de las oleadas completadas durante el asedio del pueblo.</summary>
         public float SiegeProgress => MaxWaves > 0 ? Mathf.Clamp01((float)CurrentWave / MaxWaves) : 0f;

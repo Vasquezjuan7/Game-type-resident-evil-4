@@ -76,7 +76,8 @@ namespace Gameplay.RE4
             Build();
             BuildVoices();
             _startTime = Time.time;
-            StartCoroutine(Intro());
+            // al cargar una partida guardada no se repite la introduccion (la historia la restaura el guardado)
+            if (!DeadEcho.Core.GameSession.IsRestoring) StartCoroutine(Intro());
             // gritos de los aldeanos y frases del mercader listos de antemano (solo la primera vez cuesta)
             VillagerBarks.PrefetchAll();
         }
@@ -123,6 +124,8 @@ namespace Gameplay.RE4
 
         private IEnumerator Intro()
         {
+            // la cinematica narrada de la Nueva partida va primero
+            while (IntroCinematic.Playing) yield return null;
             yield return new WaitForSeconds(0.5f);
             ShowChapter("CAPÍTULO 1\n<size=34>Valdeoscuro, España</size>");
             SetObjective(StoryStep.Arrive);
@@ -249,9 +252,32 @@ namespace Gameplay.RE4
             }
         }
 
+        /// <summary>Cambio de objetivo (lo usa el autoguardado de Dead Echo).</summary>
+        public static event System.Action<StoryStep> OnStepChanged;
+
+        public bool PendantSpawned => _pendantSpawned;
+
+        /// <summary>
+        /// Restaura la historia desde una partida guardada: paso, documentos leidos y colgante (si estaba en el suelo,
+        /// vuelve a aparecer en la iglesia). No reproduce llamadas de radio.
+        /// </summary>
+        public void RestoreFromSave(StoryStep step, List<ItemDefinition> documents, bool pendantSpawned)
+        {
+            Build();
+            Documents.Clear();
+            if (documents != null) foreach (var d in documents) if (d != null && !Documents.Contains(d)) Documents.Add(d);
+            Step = step;
+            if (_objective != null) _objective.text = "<b>OBJETIVO</b>\n" + ObjectiveText(step);
+            _objectiveFlash = 1f;
+            if (step == StoryStep.Church && pendantSpawned) SpawnPendant();
+            else _pendantSpawned = pendantSpawned || step >= StoryStep.Escape;
+        }
+
         private void SetObjective(StoryStep step)
         {
+            // solo se llama en transiciones reales (AfterSiege ya fija Step antes para no repetir)
             Step = step;
+            OnStepChanged?.Invoke(step);
             if (_objective != null) _objective.text = "<b>OBJETIVO</b>\n" + ObjectiveText(step);
             _objectiveFlash = 1f;
             ProceduralAudio.PlayAt(ProceduralAudio.Click(700f, 50f), Camera.main != null ? Camera.main.transform.position : Vector3.zero, 0.3f, 0f, 5f);
@@ -335,7 +361,6 @@ namespace Gameplay.RE4
                 if (_radio.Count > 0) Warm(_radio.Peek().Key, _radio.Peek().Value);
 
                 AudioClip clip = null;
-                if (NpcVoice.Enabled)
                 {
                     bool done = false;
                     StartCoroutine(NpcVoice.Get().GetClip(l.Value, VoiceFor(l.Key), c => { clip = c; done = true; }));
@@ -348,13 +373,16 @@ namespace Gameplay.RE4
                     ProceduralAudio.PlayAt(ProceduralAudio.Click(1800f, 25f), Camera.main.transform.position, 0.25f, 0f, 5f);
                 }
                 string color = leon ? "#9fd0ff" : "#9fffb0";
-                _subtitle.text = $"<color={color}><b>{(leon ? "Leon" : l.Key + " (radio)")}:</b></color> {l.Value}";
+                // Opciones › Audio › Subtitulos y Accesibilidad › Tamaño de texto
+                var opts = DeadEcho.Core.SettingsService.Current;
+                _subtitle.fontSize = Mathf.RoundToInt(26 * opts.TextScale);
+                _subtitle.text = opts.subtitles ? $"<color={color}><b>{(leon ? "Leon" : l.Key + " (radio)")}:</b></color> {l.Value}" : "";
                 float t = Mathf.Clamp(l.Value.Length * 0.06f, 2.5f, 7f);
                 if (clip != null)
                 {
                     AudioSource src = leon ? _leonVoice : _radioVoice;
                     src.clip = clip;
-                    src.volume = leon ? 0.9f : 1f;
+                    src.volume = DeadEcho.Core.AudioChannels.AsVoice(src, leon ? 0.9f : 1f); // Opciones › Audio › Voces
                     src.Play();
                     t = Mathf.Max(clip.length + 0.35f, 1.2f);
                 }
