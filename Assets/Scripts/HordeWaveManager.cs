@@ -388,6 +388,9 @@ namespace Gameplay
                 ProceduralAudio.PlayAt(ProceduralAudio.Bell(), bellPos, 1f, 0f, 400f);
                 yield return new WaitForSeconds(2.2f);
             }
-        }
+        }
+
+        /// <summary>Progreso normalizado (0..1) de las oleadas completadas durante el asedio del pueblo.</summary>
+        public float SiegeProgress => MaxWaves > 0 ? Mathf.Clamp01((float)CurrentWave / MaxWaves) : 0f;
     }
 }
