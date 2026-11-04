@@ -55,3 +55,15 @@ sysinfo.txt
 /DeadEcho_UI_Kit/referencias/*.jpg
 /DeadEcho_UI_Kit/referencias/*.png
 /DeadEcho_UI_Kit/assets/
+
+# ===== Modelos descargados de Sketchfab (no redistribuibles / muy pesados) =====
+# Se colocan a mano desde Descargas; RE4ImportBuilder y Merchant.cs los usan si estan.
+#  - Casas: houses-blender.zip, wooden-house.zip, house-asset.zip
+#  - Animales: cow.zip, lowpoly-pig.zip
+#  - Mercader: ga-free-251-the-shrewd-scoundrel.zip (convertido de GLB a OBJ)
+/Assets/RE4/Importados/Casas/
+/Assets/RE4/Importados/Casas.meta
+/Assets/RE4/Importados/Animales/
+/Assets/RE4/Importados/Animales.meta
+/Assets/RE4/Resources/RE4Modelos/
+/Assets/RE4/Resources/RE4Modelos.meta
