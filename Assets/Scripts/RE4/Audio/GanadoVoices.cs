@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gameplay.RE4
@@ -13,33 +12,20 @@ namespace Gameplay.RE4
     }
 
     /// <summary>
-    /// Voces no verbales de los aldeanos (gruñidos, jadeos, gritos, dolor, estertores) sintetizadas
-    /// con formantes de voz humana. Se cargan de Resources/RE4Audio/Voces_Ganado (van dentro del juego).
+    /// Voces no verbales de los aldeanos (gruñidos, jadeos, gritos, dolor, estertores) y rugidos del Tyrant
+    /// (Jefe_*), generadas con ElevenLabs. Se cargan de Resources/RE4Audio/Voces_Ganado (van dentro del juego).
     /// </summary>
     public static class GanadoVoices
     {
-        private static Dictionary<string, AudioClip[]> _sets;
-
-        private static void Load()
+        public static AudioClip Pick(GanadoSound kind, bool female, bool boss = false)
         {
-            if (_sets != null) return;
-            _sets = new Dictionary<string, AudioClip[]>();
-            var all = Resources.LoadAll<AudioClip>("RE4Audio/Voces_Ganado");
-            var groups = new Dictionary<string, List<AudioClip>>();
-            foreach (var c in all)
+            if (boss)
             {
-                // "Ganado_Grunido_03" -> "Ganado_Grunido"
-                int cut = c.name.LastIndexOf('_');
-                string key = cut > 0 ? c.name.Substring(0, cut) : c.name;
-                if (!groups.TryGetValue(key, out var list)) groups[key] = list = new List<AudioClip>();
-                list.Add(c);
+                // el Tyrant tiene sus propios rugidos; si faltan, la voz de aldeano grave
+                string b = kind == GanadoSound.Pain ? "Jefe_Dolor" : kind == GanadoSound.Death ? "Jefe_Muerte" : "Jefe_Rugido";
+                AudioClip bc = BundledAudio.Pick("Voces_Ganado", b);
+                if (bc != null) return bc;
             }
-            foreach (var kv in groups) _sets[kv.Key] = kv.Value.ToArray();
-        }
-
-        public static AudioClip Pick(GanadoSound kind, bool female)
-        {
-            Load();
             string key;
             switch (kind)
             {
@@ -49,7 +35,7 @@ namespace Gameplay.RE4
                 case GanadoSound.Pain: key = female ? "Aldeana_Dolor" : "Ganado_Dolor"; break;
                 default: key = female ? "Aldeana_Dolor" : "Ganado_Muerte"; break;
             }
-            return _sets.TryGetValue(key, out var set) && set.Length > 0 ? set[Random.Range(0, set.Length)] : null;
+            return BundledAudio.Pick("Voces_Ganado", key);
         }
     }
 }
