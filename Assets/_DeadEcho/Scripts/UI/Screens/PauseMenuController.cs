@@ -27,7 +27,8 @@ namespace DeadEcho.UI
         private UIRouter _router;
         private ActionScreen _pause;
         private UIScreen _tutorials, _loadGame, _restartModal, _quitModal;
-        private TextMeshProUGUI _loadGameText;
+        private OptionsScreen _options;
+        private DEToast _toast;
 
         private bool _blockedLastFrame = true;
         private bool _opening;
@@ -266,14 +267,18 @@ namespace DeadEcho.UI
             _router = _canvas.gameObject.AddComponent<UIRouter>();
             _pause = BuildPause(root);
             _tutorials = DEBuild.InfoScreen(root, "Pantalla_Tutoriales", "TUTORIALES", TutorialText());
-            _loadGame = DEBuild.InfoScreen(root, "Pantalla_CargarPartida", "CARGAR PARTIDA", "");
-            _loadGameText = _loadGame.transform.Find("Texto").GetComponent<TextMeshProUGUI>();
+            var slots = SlotListScreen.Create(root, "CARGAR PARTIDA", "¿Cargar la partida?",
+                "Se perderá el progreso que no esté guardado.", "Sí, cargar");
+            slots.onChosen = LoadFromSlot;
+            _loadGame = slots;
+            _toast = DEToast.Create(root);
             _restartModal = DEBuild.ConfirmModal(root, "Modal_Reiniciar", "¿Reiniciar desde el punto de control?",
                 "Se perderá el progreso desde el último punto de control.", "No, volver", "Sí, reiniciar",
                 () => LeaveTo(SceneManager.GetActiveScene().name));
             _quitModal = DEBuild.ConfirmModal(root, "Modal_SalirMenu", "¿Salir al menú principal?",
                 "Se perderá el progreso que no esté guardado.", "No, volver", "Sí, salir al menú",
                 () => LeaveTo(SceneNames.MainMenu));
+            _options = OptionsScreen.Create(root, 0.96f);
 
             LensFX.Create(root, 905, false).grainOpacity = 0.1f;
         }
@@ -290,7 +295,7 @@ namespace DeadEcho.UI
             UIFx.Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -215f), new Vector2(800f, 80f));
 
             RectTransform column = UIFx.Rect(rt, "Opciones");
-            UIFx.Place(column, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -322f), new Vector2(480f, 400f));
+            UIFx.Place(column, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -310f), new Vector2(480f, 470f));
             var layout = column.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.spacing = 3f;
             layout.childAlignment = TextAnchor.UpperCenter;
@@ -307,21 +312,21 @@ namespace DeadEcho.UI
             restart.description = "Vuelve a empezar desde el último punto de control.";
             restart.onClick.AddListener(() => _router.Push(_restartModal, true));
 
+            var save = GlassButton.Create(column, "Guardar partida", size);
+            save.description = "Guarda la partida para seguirla más tarde (no durante el asedio).";
+            save.onClick.AddListener(SaveGame);
+
             var load = GlassButton.Create(column, "Cargar partida", size);
-            load.description = "Elige una memoria guardada (DEMO).";
-            load.onClick.AddListener(() =>
-            {
-                _loadGameText.text = SlotsText();
-                _router.Push(_loadGame);
-            });
+            load.description = "Elige una partida guardada.";
+            load.onClick.AddListener(() => _router.Push(_loadGame));
 
             var tutorials = GlassButton.Create(column, "Tutoriales", size);
             tutorials.description = "Repasa los controles y las técnicas de supervivencia.";
             tutorials.onClick.AddListener(() => _router.Push(_tutorials));
 
             var options = GlassButton.Create(column, "Opciones", size);
-            options.description = "Gráficos, audio, controles y accesibilidad (disponible en la fase F5).";
-            options.interactable = false;
+            options.description = "Gráficos, audio, controles y accesibilidad.";
+            options.onClick.AddListener(() => _router.Push(_options));
 
             var quit = GlassButton.Create(column, "Salir al menú principal", size);
             bool hasMenu = Application.CanStreamedLevelBeLoaded(SceneNames.MainMenu);
@@ -330,7 +335,7 @@ namespace DeadEcho.UI
             quit.interactable = hasMenu;
             quit.onClick.AddListener(() => _router.Push(_quitModal, true));
 
-            DEBuild.LinkVertical(resume, restart, load, tutorials, options, quit);
+            DEBuild.LinkVertical(resume, restart, save, load, tutorials, options, quit);
             screen.firstSelected = resume;
 
             var desc = UIFx.Text(rt, "Descripcion", "", th.rajdhaniMedium, th.textoNormal + 2f, th.huesoClaro, TextAlignmentOptions.Center);
@@ -347,7 +352,7 @@ namespace DeadEcho.UI
         private static string TutorialText()
         {
             return
-                "<b>Movimiento</b>   W A S D · Shift correr · S + Shift giro rápido\n" +
+                "<b>Movimiento</b>   W A S D · Shift correr · Espacio saltar · Ctrl/C agacharse · Q giro rápido\n" +
                 "<b>Apuntar y disparar</b>   Ratón · clic izquierdo · R recargar · 1-5 cambiar arma\n" +
                 "<b>Cuerpo a cuerpo</b>   V cuchillo (parry y guardia) · F patada a enemigos aturdidos\n" +
                 "<b>Maletín</b>   Tab / I · C fabricar · R rotar objeto\n" +
@@ -358,27 +363,31 @@ namespace DeadEcho.UI
                 "Si te agarran, pulsa rápido para soltarte.</color>";
         }
 
-        private static string SlotsText()
+        // ------------------------------------------------------------ Guardar / cargar
+
+        private void SaveGame()
         {
-            SaveService.Load();
-            var sb = new StringBuilder();
-            string[] diff = { "Narrativa", "Superviviente", "Pesadilla" };
-            for (int i = 0; i < SaveService.Slots.Count; i++)
+            if (DeadEcho.Game.GameSaveSystem.SaveNow(false, out string msg)) _toast.Show(msg, 2.5f);
+            else
             {
-                DemoSlot s = SaveService.Slots[i];
-                sb.Append("<b>Ranura ").Append(i + 1).Append("</b>   ");
-                if (!s.used) sb.Append("<color=#9A968D>Vacía</color>");
-                else
-                {
-                    int h = s.playSeconds / 3600, m = s.playSeconds % 3600 / 60;
-                    sb.Append(s.location).Append(" · ").Append(h).Append("h ").Append(m.ToString("00")).Append("m · ")
-                      .Append(diff[Mathf.Clamp(s.difficulty, 0, 2)]).Append(" · ").Append(s.casePercent).Append("% del caso · ")
-                      .Append(s.Date.ToString("dd/MM/yyyy HH:mm"));
-                }
-                sb.Append('\n');
+                UIAudio.Play(UISound.Error);
+                _toast.Show(msg ?? "No se puede guardar ahora.", 2.5f);
             }
-            sb.Append("\n<color=#9A968D>Las memorias son de demostración: se asignan desde Nueva partida (fase F4) y no guardan el progreso real.</color>");
-            return sb.ToString();
+        }
+
+        /// <summary>Carga una partida guardada desde la pausa (con la pantalla de carga).</summary>
+        private void LoadFromSlot(int slot)
+        {
+            if (SceneLoader.IsLoading) return;
+            // el tiempo sigue parado hasta que la escena nueva este lista (SceneLoader lo restaura)
+            IsOpen = false;
+            if (Fps != null) Fps.PopInputLock();
+            if (!DeadEcho.Game.GameSaveSystem.LoadSlot(slot))
+            {
+                IsOpen = true;
+                if (Fps != null) Fps.PushInputLock();
+                UIAudio.Play(UISound.Error);
+            }
         }
     }
 }

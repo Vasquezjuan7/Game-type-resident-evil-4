@@ -42,6 +42,7 @@ namespace DeadEcho.Core
             // aplicar las opciones guardadas (resolucion, FPS, V-Sync, volumen...) al arrancar;
             // si el jugador aun no ha guardado opciones, se respeta la configuracion del proyecto
             if (SettingsService.HasSavedFile) SettingsService.Apply();
+            else SettingsService.ApplyLight(); // volumenes e idioma por defecto
         }
 
         private void Awake()
