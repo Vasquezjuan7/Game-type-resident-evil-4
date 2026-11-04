@@ -24,6 +24,8 @@ namespace Gameplay
         public Transform cameraHolder;
         public float mouseSensitivity = 2.0f;
         public float aimSensitivityMultiplier = 0.55f;
+        [Tooltip("Opciones › Controles › Invertir eje Y (lo fija Dead Echo).")]
+        public bool invertY;
         public float maxPitch = 85f;
         public float minPitch = -85f;
 
@@ -34,6 +36,36 @@ namespace Gameplay
         public float fovLerp = 10f;
         public float bobAmount = 0.035f;
         public float bobFrequency = 1.9f;
+
+        [Header("Resistencia (correr cansa)")]
+        [Tooltip("Segundos de carrera con la resistencia llena.")]
+        public float sprintDuration = 6f;
+        public float staminaRegen = 0.22f;
+        public float staminaRegenDelay = 0.9f;
+        [Tooltip("Tras agotarse no se puede volver a correr hasta recuperar este nivel.")]
+        public float exhaustedRecover = 0.35f;
+
+        [Header("Agacharse (Ctrl mantener / C alternar)")]
+        public float crouchHeight = 1.15f;
+        public float crouchSpeed = 1.9f;
+        public float crouchTransition = 9f;
+
+        [Header("Salto y caidas")]
+        public float jumpHeight = 0.85f;
+        public float jumpStaminaCost = 0.15f;
+        [Tooltip("Velocidad de caida a partir de la cual Leon se hace daño.")]
+        public float fallDamageSpeed = 11f;
+        public float fallDamagePerUnit = 9f;
+
+        [Header("Realismo")]
+        [Tooltip("Inclinacion de camara al moverse de lado (grados).")]
+        public float strafeTilt = 1.6f;
+        [Tooltip("Velocidad en estado Peligro (cojera).")]
+        public float dangerSpeedMultiplier = 0.72f;
+        public float cautionSpeedMultiplier = 0.92f;
+        [Tooltip("Radio de ruido de cada paso al correr / al caminar (los aldeanos lo oyen).")]
+        public float sprintNoiseRadius = 9f;
+        public float walkNoiseRadius = 2.5f;
 
         [Header("Compatibilidad")]
         public Transform weaponHolder;
@@ -56,6 +88,16 @@ namespace Gameplay
         public event System.Action<bool> OnFootstep;
         public bool IsQuickTurning => _quickTurnLeft > 0.01f;
 
+        /// <summary>Resistencia 0..1 (correr y saltar la gastan).</summary>
+        public float Stamina { get; private set; } = 1f;
+        /// <summary>Se agoto la resistencia: no se puede correr hasta recuperar un poco.</summary>
+        public bool IsExhausted { get; private set; }
+        /// <summary>Cansancio 0..1 (para temblor del arma, respiracion y HUD).</summary>
+        public float Fatigue => Mathf.Clamp01(1f - Stamina / 0.6f);
+        public bool IsCrouching { get; private set; }
+        /// <summary>0 = de pie, 1 = agachado del todo (transicion suave).</summary>
+        public float CrouchBlend { get; private set; }
+
         /// <summary>Frame en el que se cerro un menu con ESC (para no soltar el cursor ese mismo frame).</summary>
         public int IgnoreEscapeFrame { get; set; } = -1;
 
@@ -76,12 +118,28 @@ namespace Gameplay
         private Transform _forcedLook;
         private float _stepTimer;
         private float _quickTurnLeft;
-        private bool _quickTurnArmed = true;
+
+        private float _standHeight;
+        private float _ccBottom;
+        private Vector3 _holderBaseLocalPos;
+        private bool _crouchToggled;
+        private float _lastStaminaUse = -10f;
+        private float _breathTimer;
+        private int _breathVariant;
+        private bool _wasGrounded = true;
+        private float _airMaxFallSpeed;
+        private float _landDip;
+        private float _landDipVel;
+        private float _strafeRoll;
+        private float _limpPhase;
 
         private void Awake()
         {
             Instance = this;
             _cc = GetComponent<CharacterController>();
+            _standHeight = _cc.height;
+            _ccBottom = _cc.center.y - _cc.height * 0.5f;
+            if (cameraHolder != null) _holderBaseLocalPos = cameraHolder.localPosition;
             if (cameraHolder != null) _camera = cameraHolder.GetComponentInChildren<Camera>();
             if (_camera == null) _camera = Camera.main;
             if (_camera != null) _camBaseLocalPos = _camera.transform.localPosition;
@@ -186,6 +244,7 @@ namespace Gameplay
                 delta += DeadZone(Gamepad.current.rightStick.ReadValue()) * 60f * Time.deltaTime * mouseSensitivity;
             }
             if (IsAiming) delta *= aimSensitivityMultiplier;
+            if (invertY) delta.y = -delta.y;
             LookDelta = delta;
 
             transform.Rotate(Vector3.up * delta.x);
@@ -209,48 +268,121 @@ namespace Gameplay
         {
             Vector2 input = Vector2.zero;
             bool sprintKey = false;
+            bool crouchHeld = false;
+            bool jumpPressed = false;
+            bool quickTurnPressed = false;
+            var kb = Keyboard.current;
 
             if (!locked)
             {
-                if (Keyboard.current != null)
+                if (kb != null)
                 {
-                    if (Keyboard.current.wKey.isPressed) input.y += 1f;
-                    if (Keyboard.current.sKey.isPressed) input.y -= 1f;
-                    if (Keyboard.current.dKey.isPressed) input.x += 1f;
-                    if (Keyboard.current.aKey.isPressed) input.x -= 1f;
-                    sprintKey = Keyboard.current.leftShiftKey.isPressed;
+                    if (kb.wKey.isPressed) input.y += 1f;
+                    if (kb.sKey.isPressed) input.y -= 1f;
+                    if (kb.dKey.isPressed) input.x += 1f;
+                    if (kb.aKey.isPressed) input.x -= 1f;
+                    sprintKey = kb.leftShiftKey.isPressed;
+                    crouchHeld = kb.leftCtrlKey.isPressed;
+                    if (kb.cKey.wasPressedThisFrame) _crouchToggled = !_crouchToggled;
+                    jumpPressed = kb.spaceKey.wasPressedThisFrame;
+                    quickTurnPressed = kb.qKey.wasPressedThisFrame;
                 }
                 if (GamepadActive)
                 {
-                    Vector2 stick = DeadZone(Gamepad.current.leftStick.ReadValue());
+                    var pad = Gamepad.current;
+                    Vector2 stick = DeadZone(pad.leftStick.ReadValue());
                     if (stick.sqrMagnitude > input.sqrMagnitude) input = stick;
-                    sprintKey |= Gamepad.current.leftStickButton.isPressed;
+                    sprintKey |= pad.leftStickButton.isPressed;
+                    if (pad.rightStickButton.wasPressedThisFrame) _crouchToggled = !_crouchToggled;
+                    quickTurnPressed |= pad.dpad.down.wasPressedThisFrame;
                 }
             }
             input = Vector2.ClampMagnitude(input, 1f);
             MoveInput = input;
 
-            // Giro rapido de 180 grados (atras + correr), como en RE4
-            if (!locked && input.y < -0.5f && sprintKey && _quickTurnArmed && !IsAiming)
+            // Giro rapido de 180 grados (Q / cruceta abajo). Antes era "atras + correr" como en RE4,
+            // pero con WASD hacia que Leon girara solo al pulsar S y Shift a la vez.
+            if (!locked && quickTurnPressed && !IsAiming && _quickTurnLeft <= 0f)
             {
                 _quickTurnLeft = 180f;
-                _quickTurnArmed = false;
+                RE4.ProceduralAudio.PlayAt(RE4.ProceduralAudio.Swoosh(), transform.position, 0.12f, 0.1f, 6f);
             }
-            if (!sprintKey || input.y > -0.2f) _quickTurnArmed = true;
             if (_quickTurnLeft > 0f)
             {
                 float step = Mathf.Min(_quickTurnLeft, 900f * Time.deltaTime);
                 transform.Rotate(Vector3.up * step);
                 _quickTurnLeft -= step;
-                input = Vector2.zero;
+                input *= 0.3f;
             }
 
-            IsSprinting = sprintKey && !IsAiming && input.y > 0.3f;
+            // --- Agacharse ---
+            // Correr hacia delante levanta a Leon; si hay techo encima se queda agachado.
+            if (sprintKey && input.y > 0.3f) _crouchToggled = false;
+            bool wantCrouch = !locked ? (crouchHeld || _crouchToggled) : IsCrouching;
+            if (!wantCrouch && IsCrouching && !HasHeadroom()) wantCrouch = true;
+            IsCrouching = wantCrouch;
+            CrouchBlend = Mathf.MoveTowards(CrouchBlend, IsCrouching ? 1f : 0f, Time.deltaTime * crouchTransition * 0.35f);
+            ApplyCrouchShape();
+
+            // --- Estado de salud: cojera en Peligro ---
+            HealthStatus status = PlayerHealth.Instance != null ? PlayerHealth.Instance.Status : HealthStatus.Fine;
+            float healthMul = status == HealthStatus.Danger ? dangerSpeedMultiplier : status == HealthStatus.Caution ? cautionSpeedMultiplier : 1f;
+
+            // --- Resistencia ---
+            bool canSprint = !IsExhausted && Stamina > 0.02f && !IsCrouching;
+            IsSprinting = sprintKey && !IsAiming && input.y > 0.3f && canSprint && _quickTurnLeft <= 0f;
+
+            float planarNow = new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
+            if (IsSprinting && planarNow > 1f)
+            {
+                float drain = status == HealthStatus.Danger ? 1.5f : 1f;
+                Stamina = Mathf.Max(0f, Stamina - Time.deltaTime / Mathf.Max(0.5f, sprintDuration) * drain);
+                _lastStaminaUse = Time.time;
+            }
+            else if (Time.time - _lastStaminaUse > staminaRegenDelay)
+            {
+                // Quieto se recupera mas rapido que caminando
+                float regen = staminaRegen * (planarNow < 0.5f ? 1.4f : 1f) * (status == HealthStatus.Danger ? 0.6f : 1f);
+                Stamina = Mathf.Min(1f, Stamina + regen * Time.deltaTime);
+            }
+            if (Stamina <= 0f) IsExhausted = true;
+            else if (IsExhausted && Stamina >= exhaustedRecover) IsExhausted = false;
+            UpdateBreathing();
+
+            // --- Velocidad ---
             float speed = IsAiming ? aimSpeed : IsSprinting ? runSpeed : walkSpeed;
+            if (IsCrouching) speed = Mathf.Min(speed, crouchSpeed);
+            if (IsExhausted) speed *= 0.8f;
+            speed *= healthMul;
+            if (status == HealthStatus.Danger && planarNow > 0.5f)
+            {
+                // Paso irregular: la pierna herida frena cada zancada
+                _limpPhase += Time.deltaTime * bobFrequency * Mathf.PI * (planarNow / walkSpeed);
+                speed *= 0.82f + 0.18f * Mathf.Abs(Mathf.Sin(_limpPhase));
+            }
             if (input.y < 0f) speed *= backwardMultiplier;
 
             Vector3 desired = (transform.forward * input.y + transform.right * input.x) * speed;
-            _velocity = Vector3.Lerp(_velocity, desired, Time.deltaTime * acceleration);
+            // En el aire casi no se puede cambiar de direccion
+            float accel = _cc.isGrounded ? acceleration : acceleration * 0.15f;
+            _velocity = Vector3.Lerp(_velocity, desired, Time.deltaTime * accel);
+
+            // --- Salto ---
+            if (jumpPressed && !locked && _cc.isGrounded && !IsAiming)
+            {
+                if (IsCrouching)
+                {
+                    _crouchToggled = false; // Espacio agachado = levantarse
+                }
+                else if (Stamina >= jumpStaminaCost)
+                {
+                    _verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(gravity) * jumpHeight);
+                    Stamina -= jumpStaminaCost;
+                    _lastStaminaUse = Time.time;
+                    _wasGrounded = false;
+                    _airMaxFallSpeed = 0f;
+                }
+            }
 
             if (_cc.isGrounded && _verticalVelocity < 0f) _verticalVelocity = -2f;
             _verticalVelocity += gravity * Time.deltaTime;
@@ -258,6 +390,9 @@ namespace Gameplay
             Vector3 move = _velocity + Vector3.up * _verticalVelocity;
             if (_cc.enabled) _cc.Move(move * Time.deltaTime);
 
+            HandleLanding();
+
+            // --- Pasos y ruido ---
             float planar = new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
             if (_cc.isGrounded && planar > 0.5f)
             {
@@ -265,11 +400,78 @@ namespace Gameplay
                 _stepTimer -= Time.deltaTime * (planar / walkSpeed);
                 if (_stepTimer <= 0f)
                 {
-                    _stepTimer = 0.5f;
-                    if (OnFootstep != null) OnFootstep(IsSprinting);
-                    else RE4.ProceduralAudio.PlayAt(RE4.ProceduralAudio.Impact(0.4f), transform.position, IsSprinting ? 0.22f : 0.12f, 0.2f, 15f);
+                    _stepTimer = IsCrouching ? 0.42f : 0.5f;
+                    if (!IsCrouching || Random.value < 0.5f) // agachado los pasos casi no suenan
+                    {
+                        if (OnFootstep != null) OnFootstep(IsSprinting);
+                        else RE4.ProceduralAudio.PlayAt(RE4.ProceduralAudio.Impact(0.4f), transform.position, IsSprinting ? 0.22f : 0.12f, 0.2f, 15f);
+                    }
+                    float noise = IsCrouching ? 0f : IsSprinting ? sprintNoiseRadius : walkNoiseRadius;
+                    if (noise > 0f) RE4.NoiseSystem.Emit(transform.position, noise);
                 }
             }
+        }
+
+        /// <summary>Ajusta la capsula y la altura de la camara segun lo agachado que este Leon.</summary>
+        private void ApplyCrouchShape()
+        {
+            if (_cc == null) return;
+            float h = Mathf.Lerp(_standHeight, Mathf.Min(crouchHeight, _standHeight), CrouchBlend);
+            if (Mathf.Abs(_cc.height - h) > 0.0005f)
+            {
+                _cc.height = h;
+                _cc.center = new Vector3(_cc.center.x, _ccBottom + h * 0.5f, _cc.center.z);
+            }
+            if (cameraHolder != null)
+                cameraHolder.localPosition = _holderBaseLocalPos - Vector3.up * ((_standHeight - Mathf.Min(crouchHeight, _standHeight)) * CrouchBlend);
+        }
+
+        /// <summary>Hay sitio para ponerse de pie (nada encima de la cabeza).</summary>
+        private bool HasHeadroom()
+        {
+            float r = _cc.radius * 0.9f;
+            Vector3 bottom = transform.position + Vector3.up * (_ccBottom + r);
+            Vector3 start = bottom + Vector3.up * Mathf.Max(0f, _cc.height - 2f * r);
+            float dist = _standHeight - _cc.height + 0.05f;
+            return !Physics.SphereCast(start, r, Vector3.up, out _, dist, ~0, QueryTriggerInteraction.Ignore);
+        }
+
+        /// <summary>Al aterrizar: hundimiento de camara, golpe, ruido y daño si la caida es alta.</summary>
+        private void HandleLanding()
+        {
+            bool grounded = _cc.isGrounded;
+            if (!grounded)
+            {
+                _airMaxFallSpeed = Mathf.Max(_airMaxFallSpeed, -_verticalVelocity);
+            }
+            else if (!_wasGrounded)
+            {
+                float v = _airMaxFallSpeed;
+                if (v > 3.5f)
+                {
+                    _landDip = Mathf.Min(0.16f, v * 0.012f);
+                    AddShake(Mathf.Clamp01(v / 25f));
+                    RE4.ProceduralAudio.PlayAt(RE4.ProceduralAudio.Impact(0.7f), transform.position, Mathf.Clamp01(v / 14f) * 0.35f, 0.15f, 15f);
+                    RE4.NoiseSystem.Emit(transform.position, Mathf.Min(12f, v));
+                }
+                if (v > fallDamageSpeed && PlayerHealth.Instance != null)
+                    PlayerHealth.Instance.TakeDamage((v - fallDamageSpeed) * fallDamagePerUnit, transform.position + Vector3.down);
+                _airMaxFallSpeed = 0f;
+            }
+            _wasGrounded = grounded;
+        }
+
+        /// <summary>Jadeo cuando Leon esta cansado (mas seguido cuanto mas agotado).</summary>
+        private void UpdateBreathing()
+        {
+            float f = IsExhausted ? 1f : Fatigue;
+            if (f < 0.25f || (PlayerHealth.Instance != null && PlayerHealth.Instance.IsDead)) { _breathTimer = 0.3f; return; }
+            _breathTimer -= Time.deltaTime;
+            if (_breathTimer > 0f) return;
+            _breathTimer = Mathf.Lerp(1.6f, 0.95f, f);
+            _breathVariant = (_breathVariant + 1) % 3;
+            Vector3 p = cameraHolder != null ? cameraHolder.position : transform.position + Vector3.up * 1.6f;
+            RE4.ProceduralAudio.PlayAt(RE4.ProceduralAudio.Breath(_breathVariant), p, 0.05f + 0.13f * f, 0.08f, 4f);
         }
 
         private void HandleCamera()
@@ -299,12 +501,26 @@ namespace Gameplay
             float bobScale = Mathf.Clamp01(planar / walkSpeed) * (IsAiming ? 0.25f : 1f) * (IsSprinting ? 1.5f : 1f);
             Vector3 bob = new Vector3(Mathf.Sin(BobPhase * 0.5f) * bobAmount * 0.6f, Mathf.Abs(Mathf.Sin(BobPhase * 0.5f)) * bobAmount, 0f) * bobScale;
 
-            _camera.transform.localPosition = _camBaseLocalPos + bob;
-            _camera.transform.localRotation = Quaternion.Euler(shakeRot + new Vector3(0f, 0f, _rollOffset));
+            // Movimientos "de cuerpo": se apagan con Balanceo de camara = No o Reducir movimiento
+            float bodyMotion = bobAmount > 0f ? 1f : 0f;
 
-            float targetFov = TargetFovOverride > 1f ? TargetFovOverride : IsSprinting ? sprintFov : baseFov;
+            // Inclinacion al moverse de lado
+            float tiltTarget = -MoveInput.x * strafeTilt * (IsAiming ? 0.35f : 1f) * Mathf.Clamp01(planar / walkSpeed) * bodyMotion;
+            _strafeRoll = Mathf.Lerp(_strafeRoll, tiltTarget, Time.deltaTime * 6f);
+
+            // Hundimiento al aterrizar (muelle que vuelve a su sitio)
+            _landDip = Mathf.SmoothDamp(_landDip, 0f, ref _landDipVel, 0.12f);
+
+            // Respiracion agitada: la camara sube y baja con el jadeo
+            float tired = IsExhausted ? 1f : Fatigue;
+            float breathe = Mathf.Sin(Time.time * Mathf.Lerp(1.3f, 3.2f, tired)) * tired * bodyMotion;
+
+            _camera.transform.localPosition = _camBaseLocalPos + bob + new Vector3(0f, -_landDip * bodyMotion + breathe * 0.008f, 0f);
+            _camera.transform.localRotation = Quaternion.Euler(shakeRot + new Vector3(breathe * 0.45f, 0f, _rollOffset + _strafeRoll));
+
+            float targetFov = TargetFovOverride > 1f ? TargetFovOverride : IsSprinting ? sprintFov : IsCrouching ? baseFov - 2f : baseFov;
             _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, targetFov, Time.deltaTime * fovLerp);
-        }
+        }
 
         /// <summary>Magnitud de la velocidad en el plano XZ y limpieza de retroceso acumulado.</summary>
         public float PlanarSpeed => new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
