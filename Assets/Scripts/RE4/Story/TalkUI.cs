@@ -160,6 +160,7 @@ namespace Gameplay.RE4
             npc.Voice.Stop();
             npc.Voice.clip = clip;
             npc.Voice.pitch = npc.voicePitch;
+            npc.Voice.volume = DeadEcho.Core.AudioChannels.AsVoice(npc.Voice, 1f); // Opciones › Audio › Voces
             npc.Voice.Play();
         }
 

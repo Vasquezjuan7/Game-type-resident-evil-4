@@ -65,7 +65,7 @@ namespace Gameplay.RE4
         /// </summary>
         public void SayIfCached(string text)
         {
-            if (!NpcVoice.Enabled || string.IsNullOrWhiteSpace(text) || _src == null) return;
+            if (string.IsNullOrWhiteSpace(text) || _src == null) return;
             AudioClip clip = NpcVoice.Get().Cached(text, NpcVoice.VoiceLeon);
             if (clip == null)
             {
@@ -75,6 +75,7 @@ namespace Gameplay.RE4
             _src.Stop();
             _src.pitch = 1f;
             _src.clip = clip;
+            _src.volume = DeadEcho.Core.AudioChannels.AsVoice(_src, 0.95f);
             _src.Play();
         }
 
@@ -95,13 +96,14 @@ namespace Gameplay.RE4
             _src.Stop();
             _src.pitch = 1f;
             _src.clip = clip;
+            _src.volume = DeadEcho.Core.AudioChannels.AsVoice(_src, 0.95f);
             _src.Play();
         }
 
         /// <summary>Frase corta de combate: solo si ya esta generada (para que no llegue tarde).</summary>
         private void Quip(string[] set)
         {
-            if (!NpcVoice.Enabled || Time.time < _next || IsSpeaking) return;
+            if (Time.time < _next || IsSpeaking) return;
             NpcVoice v = NpcVoice.Get();
             int start = Random.Range(0, set.Length);
             for (int i = 0; i < set.Length; i++)
@@ -109,7 +111,7 @@ namespace Gameplay.RE4
                 AudioClip c = v.Cached(set[(start + i) % set.Length], NpcVoice.VoiceLeon);
                 if (c == null) continue;
                 _src.pitch = 1f;
-                _src.PlayOneShot(c, 0.95f);
+                _src.PlayOneShot(c, DeadEcho.Core.AudioChannels.AsVoice(_src, 0.95f));
                 _next = Time.time + Random.Range(7f, 12f);
                 return;
             }

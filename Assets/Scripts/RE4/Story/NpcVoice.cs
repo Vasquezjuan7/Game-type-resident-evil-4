@@ -58,10 +58,10 @@ namespace Gameplay.RE4
         /// Generar de antemano los gritos de los aldeanos y las frases de combate de Leon. Con Gemini agotaba
         /// el cupo diario; con las voces de Windows es gratis, asi que se hace.
         /// </summary>
-        public static bool AllowBackgroundVoices => !UseGeminiTts && WindowsVoice.Available;
+        public static bool AllowBackgroundVoices => !UseGeminiTts && (WindowsVoice.Available || PiperTts.Available);
 
         /// <summary>Hay voz: la de Windows, o Gemini si esta activado y hay clave.</summary>
-        public static bool Enabled => WindowsVoice.Available || (UseGeminiTts && !string.IsNullOrEmpty(NpcChat.GeminiKey));
+        public static bool Enabled => WindowsVoice.Available || PiperTts.Available || (UseGeminiTts && !string.IsNullOrEmpty(NpcChat.GeminiKey));
 
         public static string CacheFolder => Path.Combine(Application.persistentDataPath, "voces");
 
@@ -93,9 +93,21 @@ namespace Gameplay.RE4
             return "win_" + Hash(p.voice + p.pitch + p.rate, text);
         }
 
+        /// <summary>Identificador de la voz de Piper de una frase (cambia si cambia el perfil del personaje).</summary>
+        private static string PiperId(string voice, string text) => "piper_" + Hash(PiperTts.Key(voice), text);
+
         /// <summary>Clip ya disponible (memoria o disco) o null.</summary>
         public AudioClip Cached(string text, string voice)
         {
+            // frases incluidas en el juego (ElevenLabs, Resources/RE4Audio/Frases): siempre primero
+            AudioClip bundled = BundledAudio.Line(BundledAudio.FolderForVoice(voice), text);
+            if (bundled != null) return bundled;
+            // voz de Piper (la misma que las frases incluidas): antes que la de Windows
+            if (!UseGeminiTts && PiperTts.Has(voice))
+            {
+                AudioClip pc = Load(PiperId(voice, text));
+                if (pc != null) return pc;
+            }
             // con Gemini desactivado no se mezclan sus voces viejas con las de Windows (cada personaje suena siempre igual)
             if (UseGeminiTts)
             {
@@ -122,11 +134,13 @@ namespace Gameplay.RE4
         /// <summary>Obtiene la voz de una frase (de la cache o generandola). done recibe null si no se pudo.</summary>
         public IEnumerator GetClip(string text, string voice, Action<AudioClip> done)
         {
-            if (string.IsNullOrWhiteSpace(text) || !Enabled) { done?.Invoke(null); yield break; }
-            AudioClip cached = Cached(text, voice);
+            if (string.IsNullOrWhiteSpace(text)) { done?.Invoke(null); yield break; }
+            AudioClip cached = Cached(text, voice); // las frases incluidas suenan aunque no haya voz de Windows/Gemini
             if (cached != null) { done?.Invoke(cached); yield break; }
+            if (!Enabled) { done?.Invoke(null); yield break; }
 
-            string id = UseGeminiTts ? Hash(voice, text) : WinId(voice, text);
+            bool piper = !UseGeminiTts && PiperTts.Has(voice);
+            string id = UseGeminiTts ? Hash(voice, text) : piper ? PiperId(voice, text) : WinId(voice, text);
             // otra peticion ya esta generando esta frase: esperar a que acabe
             if (_pending.Contains(id))
             {
@@ -143,7 +157,24 @@ namespace Gameplay.RE4
             if (UseGeminiTts && !string.IsNullOrEmpty(NpcChat.GeminiKey))
                 yield return GeminiTts(text, voice, id, direct, c => result = c);
 
-            // Voz de Windows: sin internet ni limite (tambien de respaldo si Gemini falla)
+            // Piper: voz neuronal sin internet, la misma que las frases incluidas en el juego
+            if (result == null && piper)
+            {
+                string file = Path.Combine(CacheFolder, id + ".wav");
+                bool ok = false;
+                yield return PiperTts.Synthesize(text, voice, file, r => ok = r);
+                if (ok)
+                {
+                    try
+                    {
+                        result = WavToClip(File.ReadAllBytes(file), id);
+                        if (result != null) _memory[id] = result;
+                    }
+                    catch (Exception) { result = null; }
+                }
+            }
+
+            // Voz de Windows: sin internet ni limite (tambien de respaldo si Gemini o Piper fallan)
             if (result == null && WindowsVoice.Available)
             {
                 string wid = WinId(voice, text);
@@ -272,7 +303,7 @@ namespace Gameplay.RE4
         /// <summary>Dice una frase por un AudioSource (3D para personajes, 2D para la radio).</summary>
         public void Say(AudioSource source, string text, string voice, float volume = 1f, float pitch = 1f, Action<float> onStart = null)
         {
-            if (source == null || !Enabled) return;
+            if (source == null) return;
             StartCoroutine(SayRoutine(source, text, voice, volume, pitch, onStart));
         }
 
@@ -284,7 +315,7 @@ namespace Gameplay.RE4
             source.Stop();
             source.clip = clip;
             source.pitch = pitch;
-            source.volume = volume;
+            source.volume = DeadEcho.Core.AudioChannels.AsVoice(source, volume); // Opciones › Audio › Voces
             source.Play();
             onStart?.Invoke(clip.length / Mathf.Max(0.1f, pitch));
         }
