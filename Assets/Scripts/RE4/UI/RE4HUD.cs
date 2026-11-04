@@ -23,6 +23,8 @@ namespace Gameplay.RE4
         private bool _parryPerfect;
         private Text _bossName;
         private Image _healthFill, _healthBack;
+        private Image _staminaBack, _staminaFill;
+        private CanvasGroup _staminaGroup;
         private RectTransform _ecg;
         private Image _crosshair;
         private Image[] _hitMarks = new Image[4];
@@ -133,6 +135,11 @@ namespace Gameplay.RE4
             _ecg = UIFactory.Panel(_healthBack.transform, "ECG", new Color(1f, 1f, 1f, 0.75f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4f, 0f)).rectTransform;
             _status = UIFactory.Label(panel.transform, "Status", "FINE", 22, new Color(0.3f, 1f, 0.4f), TextAnchor.MiddleLeft,
                 new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(326f, 18f), new Vector2(110f, 30f), FontStyle.Bold);
+            // Resistencia: barra fina que solo aparece al gastarla
+            _staminaBack = UIFactory.Panel(panel.transform, "StaminaBack", new Color(0.12f, 0.12f, 0.12f, 0.9f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(118f, 51f), new Vector2(200f, 6f));
+            _staminaFill = UIFactory.Panel(_staminaBack.transform, "StaminaFill", new Color(0.85f, 0.85f, 0.78f), new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
+            _staminaGroup = _staminaBack.gameObject.AddComponent<CanvasGroup>();
+            _staminaGroup.alpha = 0f;
             UIFactory.Label(panel.transform, "LifeLbl", "LIFE", 14, new Color(0.7f, 0.7f, 0.7f), TextAnchor.LowerLeft,
                 new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(18f, 46f), new Vector2(100f, 20f));
 
@@ -178,7 +185,7 @@ namespace Gameplay.RE4
 
             // Controles
             _controls = UIFactory.Label(root, "Controls",
-                "<b>CONTROLES</b>\nWASD Mover · Shift Correr\nClic der. Apuntar · Clic izq. Disparar\nR Recargar · 1-5 / Rueda Cambiar arma\nV Cuchillo · F Patada (enemigo aturdido)\nE Recoger / Hablar · TAB Maletín (C fabricar) · J Archivos\nV Cuchillo (mantén para guardia, pulsa al recibir un golpe para PARRY)\nS+Shift Giro rápido · L Linterna",
+                "<b>CONTROLES</b>\nWASD Mover · Shift Correr (cansa) · Espacio Saltar\nCtrl (mantener) / C Agacharse · Q Giro rápido 180°\nClic der. Apuntar · Clic izq. Disparar\nR Recargar · 1-5 / Rueda Cambiar arma\nV Cuchillo · F Patada (enemigo aturdido)\nE Recoger / Hablar · TAB Maletín (C fabricar) · J Archivos\nV Cuchillo (mantén para guardia, pulsa al recibir un golpe para PARRY)\nL Linterna",
                 18, new Color(1f, 1f, 1f, 0.85f), TextAnchor.LowerLeft,
                 new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(26f, 26f), new Vector2(700f, 230f));
 
@@ -192,6 +199,21 @@ namespace Gameplay.RE4
         }
 
         // ------------------------------------------------------------ Actualizacion
+
+        /// <summary>Barra de resistencia: aparece al correr/saltar, roja y parpadeando si Leon esta agotado.</summary>
+        private void UpdateStamina()
+        {
+            var fps = FirstPersonController.Instance;
+            if (fps == null || _staminaFill == null) return;
+            float s = fps.Stamina;
+            _staminaFill.rectTransform.anchorMax = new Vector2(s, 1f);
+            Color c = fps.IsExhausted
+                ? Color.Lerp(new Color(0.9f, 0.2f, 0.12f), new Color(1f, 0.55f, 0.3f), Mathf.PingPong(Time.time * 3f, 1f))
+                : Color.Lerp(new Color(0.95f, 0.65f, 0.2f), new Color(0.85f, 0.85f, 0.78f), Mathf.InverseLerp(0.15f, 0.5f, s));
+            _staminaFill.color = c;
+            float target = s < 0.995f ? 1f : 0f;
+            _staminaGroup.alpha = Mathf.MoveTowards(_staminaGroup.alpha, target, Time.deltaTime * (target > 0f ? 6f : 1.2f));
+        }
 
         private void Update()
         {
@@ -236,6 +258,8 @@ namespace Gameplay.RE4
                 float speed = ph.Status == HealthStatus.Danger ? 1.6f : ph.Status == HealthStatus.Caution ? 1.1f : 0.7f;
                 float x = Mathf.Repeat(Time.time * speed, 1f) * 300f;
                 _ecg.anchoredPosition = new Vector2(x, 0f);
+
+                UpdateStamina();
 
                 // Vineta
                 float hitFlash = Mathf.Clamp01(1f - (Time.time - ph.LastHitTime) / 0.6f) * 0.55f;
