@@ -34,6 +34,14 @@ namespace DeadEcho.Core
         public bool invertY;
         public bool vibration = true;
 
+        // Camara
+        public int fov = 68;             // grados (el baseFov del FirstPersonController)
+        public bool headBob = true;
+
+        // HUD
+        public bool showHud = true;
+        public int hudOpacity = 100;     // 0..100
+
         // Idioma
         public string language = "es";
 
@@ -44,6 +52,16 @@ namespace DeadEcho.Core
         public bool holdToToggle;        // mantener (false) o pulsar (true)
 
         public GameSettings Clone() => (GameSettings)MemberwiseClone();
+
+        /// <summary>Misma configuracion de pantalla (resolucion y modo).</summary>
+        public bool SameDisplay(GameSettings o) =>
+            o != null && o.resolutionWidth == resolutionWidth && o.resolutionHeight == resolutionHeight && o.screenMode == screenMode;
+
+        /// <summary>Todos los campos iguales (para saber si hay cambios sin confirmar).</summary>
+        public bool SameAs(GameSettings o) => o != null && JsonUtility.ToJson(this) == JsonUtility.ToJson(o);
+
+        /// <summary>Escala del texto de Accesibilidad (pequeño / normal / grande).</summary>
+        public float TextScale => textSize <= 0 ? 0.85f : textSize >= 2 ? 1.25f : 1f;
     }
 
     /// <summary>
@@ -109,18 +127,17 @@ namespace DeadEcho.Core
             _current = s != null ? s.Clone() : new GameSettings();
         }
 
-        /// <summary>Aplica los valores reales al motor. El brillo y el grano los aplica el post-proceso al oir OnApplied.</summary>
-        public static void Apply()
+        /// <summary>
+        /// Aplica los valores reales al motor. El brillo, el grano y el modo daltonico los aplica ScreenGrade
+        /// (y el resto de piezas del juego) al oir OnApplied. applyDisplay = false no toca resolucion ni modo
+        /// de pantalla (Opciones los aplica solo al confirmar, con la cuenta atras de 15 s).
+        /// </summary>
+        public static void Apply(bool applyDisplay = true)
         {
             GameSettings s = Current;
 
             // Resolucion y modo de pantalla
-            FullScreenMode mode = s.screenMode == 0 ? FullScreenMode.ExclusiveFullScreen
-                : s.screenMode == 1 ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-            int w = s.resolutionWidth > 0 ? s.resolutionWidth : Screen.currentResolution.width;
-            int h = s.resolutionHeight > 0 ? s.resolutionHeight : Screen.currentResolution.height;
-            if (!Application.isEditor && (Screen.width != w || Screen.height != h || Screen.fullScreenMode != mode))
-                Screen.SetResolution(w, h, mode);
+            if (applyDisplay) ApplyDisplay(s);
 
             // Calidad
             if (s.qualityLevel >= 0 && s.qualityLevel < QualitySettings.names.Length && QualitySettings.GetQualityLevel() != s.qualityLevel)
@@ -132,10 +149,30 @@ namespace DeadEcho.Core
             QualitySettings.vSyncCount = s.vSync ? 1 : 0;
             Application.targetFrameRate = s.fpsLimit > 0 ? s.fpsLimit : -1;
 
-            // Volumen general (los canales de musica/efectos/voces van por el AudioMixer en la fase de Opciones)
-            AudioListener.volume = Mathf.Clamp01(s.masterVolume / 100f);
+            ApplyLight();
+        }
 
+        /// <summary>
+        /// Solo lo que no cambia la configuracion grafica del proyecto: volumenes, idioma y avisos (OnApplied).
+        /// Se usa al arrancar cuando el jugador aun no ha guardado opciones.
+        /// </summary>
+        public static void ApplyLight()
+        {
+            GameSettings s = Current;
+            // Efectos = todo lo que pasa por el listener; musica y voces aplican su canal (AudioChannels)
+            AudioListener.volume = AudioChannels.Effects;
+            Loc.ApplyLanguage(s.language);
             OnApplied?.Invoke(s);
+        }
+
+        public static void ApplyDisplay(GameSettings s)
+        {
+            FullScreenMode mode = s.screenMode == 0 ? FullScreenMode.ExclusiveFullScreen
+                : s.screenMode == 1 ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
+            int w = s.resolutionWidth > 0 ? s.resolutionWidth : Screen.currentResolution.width;
+            int h = s.resolutionHeight > 0 ? s.resolutionHeight : Screen.currentResolution.height;
+            if (!Application.isEditor && (Screen.width != w || Screen.height != h || Screen.fullScreenMode != mode))
+                Screen.SetResolution(w, h, mode);
         }
 
         public static void ResetAll()
