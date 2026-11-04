@@ -18,7 +18,7 @@ namespace DeadEcho.Core
             "Rompe cajas y barriles: suelen esconder pesetas y munición.",
             "Si un aldeano levanta el brazo para lanzar, apártate de su trayectoria.",
             "Lee los documentos (J): cuentan lo que ocurrió en el pueblo.",
-            "Girar rápido (S + Shift) te saca de más de un aprieto.",
+            "Girar rápido (Q) te saca de más de un aprieto. Agachado (Ctrl / C) los aldeanos tardan más en verte.",
             "No malgastes munición: los aldeanos caídos pueden levantarse."
         };
 

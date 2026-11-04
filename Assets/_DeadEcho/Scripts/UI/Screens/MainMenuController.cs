@@ -8,15 +8,18 @@ namespace DeadEcho.UI
 {
     /// <summary>
     /// Menu principal (F1, 01_Main.html). Va en la escena MainMenu y construye toda la interfaz al arrancar:
-    /// logo con eco, opciones con trazo de tinta, descripcion, "↵ Confirmar", usuario arriba a la derecha,
-    /// Creditos y el modal de Salir. El fondo es provisional (niebla + lente) hasta las tomas cinematicas de F2.
+    /// tomas cinematicas de fondo (F2), logo con eco, opciones con trazo de tinta, descripcion, "↵ Confirmar",
+    /// usuario arriba a la derecha, Nueva partida (F4), Opciones (F5), Creditos, el modal de Salir y el modo cine.
     /// </summary>
     public class MainMenuController : MonoBehaviour
     {
         private UIRouter _router;
         private UIScreen _menu;
         private CreditsScreen _credits;
+        private NewGameScreen _newGame;
+        private OptionsScreen _options;
         private UIScreen _exitModal;
+        private InkMenuItem _continue, _newItem, _optionsItem, _creditsItem, _quitItem;
         private Image _black;
 
         private void Start()
@@ -35,16 +38,25 @@ namespace DeadEcho.UI
             Canvas canvas = DEBuild.Canvas("Canvas_MenuPrincipal", 10, transform);
             Transform root = canvas.transform;
 
-            BuildBackground(root);
+            CanvasGroup leftGradient = BuildBackground(root);
 
             _router = canvas.gameObject.AddComponent<UIRouter>();
             _menu = BuildMenu(root);
             _credits = CreditsScreen.Create(root);
+            _newGame = NewGameScreen.Create(root);
+            _newGame.onMemoryChanged = RefreshContinue;
+            _options = OptionsScreen.Create(root);
             _exitModal = DEBuild.ConfirmModal(root, "Modal_Salir", "¿Salir de Dead Echo?", null, "No, volver", "Sí, salir del juego",
                 () => StartCoroutine(Quit()));
             _router.initialScreen = _menu;
 
-            LensFX.Create(root, 30, false);
+            LensFX lens = LensFX.Create(root, 30, false);
+
+            // modo cine: tras 20 s sin input en la raiz del menu
+            IdleCinemaMode cinema = IdleCinemaMode.Create(root, _router, _menu, leftGradient);
+            var cinemaCanvas = cinema.gameObject.AddComponent<Canvas>();
+            cinemaCanvas.overrideSorting = true;
+            cinemaCanvas.sortingOrder = 35; // encima del grano para que las franjas sean negro puro
 
             _black = UIFx.Image(root, "Negro", th.blanco, new Color(0f, 0f, 0f, 0f));
             UIFx.Stretch(_black.rectTransform);
@@ -53,35 +65,24 @@ namespace DeadEcho.UI
             top.sortingOrder = 40;
         }
 
-        // ------------------------------------------------------------ Fondo provisional
+        // ------------------------------------------------------------ Fondo: tomas cinematicas
 
-        private static void BuildBackground(Transform root)
+        /// <summary>Fondo de reserva + las 3 tomas (F2) + degradado izquierdo para leer el menu (se devuelve para el modo cine).</summary>
+        private static CanvasGroup BuildBackground(Transform root)
         {
             UITheme th = UITheme.Current;
             RawImage bg = UIFx.Stretch(UIFx.Rect(root, "Fondo")).gameObject.AddComponent<RawImage>();
             bg.texture = DEBuild.VerticalGradient(new Color(0.03f, 0.03f, 0.03f), new Color(0.16f, 0.16f, 0.15f));
             bg.raycastTarget = false;
 
-            for (int i = 0; i < 3; i++)
-            {
-                RawImage fog = UIFx.Stretch(UIFx.Rect(root, "Niebla" + i)).gameObject.AddComponent<RawImage>();
-                fog.texture = DEBuild.FogTexture(256, 128, 2.5f + i * 1.5f, 21 + i * 5, 1.3f);
-                fog.uvRect = new Rect(0f, 0f, 1f + i * 0.4f, 1f);
-                fog.raycastTarget = false;
-                var d = fog.gameObject.AddComponent<FogDrift>();
-                d.speed = new Vector2(0.004f + i * 0.005f, 0f) * (i % 2 == 0 ? 1f : -1f);
-                d.baseAlpha = 0.16f + i * 0.05f;
-                d.alphaPulse = 0.05f;
-                d.pushScale = i == 0 ? 1.12f : 1f;
-                d.pushTime = 30f;
-            }
-            FallingAsh.Create(root, 30, new Color(0.8f, 0.8f, 0.78f, 0.35f));
+            MenuCinematics.Create(root);
 
             // degradado negro a la izquierda para leer el menu
             Image left = UIFx.Image(root, "DegradadoIzq", th.degradadoIzq, new Color(0f, 0f, 0f, 0.9f));
             left.rectTransform.anchorMin = Vector2.zero;
             left.rectTransform.anchorMax = new Vector2(0.62f, 1f);
             left.rectTransform.offsetMin = left.rectTransform.offsetMax = Vector2.zero;
+            return left.gameObject.AddComponent<CanvasGroup>();
         }
 
         // ------------------------------------------------------------ Menu
@@ -125,30 +126,29 @@ namespace DeadEcho.UI
             layout.childControlWidth = false;
             layout.childForceExpandHeight = false;
 
-            InkMenuItem cont = InkMenuItem.Create(column, "Continuar");
-            cont.description = "Retoma la investigación desde tu último guardado.";
-            cont.interactable = SaveService.HasAnyMemory;
-            if (!cont.interactable) cont.description = "No hay ninguna memoria guardada.";
-            cont.onClick.AddListener(() => SceneLoader.Load(SceneNames.Game));
+            _continue = InkMenuItem.Create(column, "Continuar");
+            _continue.onClick.AddListener(ContinueGame);
 
-            InkMenuItem nueva = InkMenuItem.Create(column, "Nueva partida");
-            nueva.description = "Empieza una nueva investigación en el pueblo de Valdeoscuro.";
-            nueva.onClick.AddListener(() => SceneLoader.Load(SceneNames.Game));
+            _newItem = InkMenuItem.Create(column, "Nueva partida");
+            _newItem.description = "Empieza una nueva investigación en el pueblo de Valdeoscuro.";
+            _newItem.onClick.AddListener(() => _router.Push(_newGame));
 
-            InkMenuItem opciones = InkMenuItem.Create(column, "Opciones");
-            opciones.description = "Gráficos, audio, controles y accesibilidad (disponible en la fase F5).";
-            opciones.interactable = false;
+            _optionsItem = InkMenuItem.Create(column, "Opciones");
+            _optionsItem.description = "Gráficos, audio, controles y accesibilidad.";
+            _optionsItem.onClick.AddListener(() => _router.Push(_options));
 
-            InkMenuItem creditos = InkMenuItem.Create(column, "Créditos");
-            creditos.description = "Las personas detrás de Dead Echo.";
-            creditos.onClick.AddListener(() => _router.Push(_credits));
+            _creditsItem = InkMenuItem.Create(column, "Créditos");
+            _creditsItem.description = "Las personas detrás de Dead Echo.";
+            _creditsItem.onClick.AddListener(() => _router.Push(_credits));
 
-            InkMenuItem salir = InkMenuItem.Create(column, "Salir");
-            salir.description = "Cierra el juego.";
-            salir.onClick.AddListener(() => _router.Push(_exitModal, true));
+            _quitItem = InkMenuItem.Create(column, "Salir");
+            _quitItem.description = "Cierra el juego.";
+            _quitItem.onClick.AddListener(() => _router.Push(_exitModal, true));
 
-            DEBuild.LinkVertical(cont, nueva, opciones, creditos, salir);
-            screen.firstSelected = cont.interactable ? cont : nueva;
+            RefreshContinue();
+            screen.firstSelected = _continue.interactable ? (Selectable)_continue : _newItem;
+            // al volver de Nueva partida puede haber una memoria nueva: Continuar se habilita
+            screen.OnShown += RefreshContinue;
 
             // Descripcion + Confirmar
             var desc = UIFx.Text(rt, "Descripcion", "", th.courierPrime, 24f, th.huesoClaro, TextAlignmentOptions.Left, 1f);
@@ -158,6 +158,24 @@ namespace DeadEcho.UI
             var hints = DEBuild.HintsRow(rt, false, new DEBuild.KeyHintDef("Enter", "A", "Confirmar", 20f));
             UIFx.Place(hints, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(159f, 50f), new Vector2(600f, 40f));
             return screen;
+        }
+
+        /// <summary>Continuar: deshabilitado (y se salta) sin memorias; si hay, carga la mas reciente.</summary>
+        private void RefreshContinue()
+        {
+            if (_continue == null) return;
+            SaveService.Load();
+            _continue.interactable = SaveService.HasAnyMemory;
+            _continue.description = _continue.interactable ? "Retoma la investigación desde tu último guardado." : "No hay ninguna memoria guardada.";
+            DEBuild.LinkVertical(_continue, _newItem, _optionsItem, _creditsItem, _quitItem);
+            if (_menu != null) _menu.firstSelected = _continue.interactable ? (Selectable)_continue : _newItem;
+        }
+
+        private void ContinueGame()
+        {
+            int i = SaveService.MostRecentIndex;
+            if (i < 0) return;
+            DeadEcho.Game.GameSaveSystem.LoadSlot(i); // restaura la partida guardada
         }
 
         private IEnumerator Quit()
