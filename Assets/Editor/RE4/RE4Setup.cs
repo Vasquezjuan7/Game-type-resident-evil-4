@@ -47,6 +47,7 @@ namespace LevelSetup.RE4Tools
                 var controller = RE4ZombieRig.BuildController();
 
                 Progress("Datos de armas y objetos", 0.25f);
+                RE4ImportBuilder.BuildAll(); // casas y animales descargados
                 var db = RE4DataBuilder.Build();
                 RE4SoundBuilder.Build(db);
 
@@ -60,6 +61,7 @@ namespace LevelSetup.RE4Tools
 
                 Progress("Construyendo el pueblo", 0.45f);
                 var village = RE4VillageBuilder.Build(1987);
+                RE4VillageBuilder.AddExpansion(village.root);
 
                 Progress("Iluminación y niebla", 0.6f);
                 SetupAtmosphere();
@@ -73,6 +75,8 @@ namespace LevelSetup.RE4Tools
                 SetBoss(boss);
                 PlaceItems(db);
                 PlaceNewItems(db);
+                PlaceExtraLoot(db);
+                PlaceAnimals();
 
                 Progress("Historia, NPC y ambiente", 0.9f);
                 RE4StoryBuilder.Build(db, village, leon);
@@ -147,6 +151,7 @@ namespace LevelSetup.RE4Tools
                 Progress("Capas", 0.05f);
                 RE4EditorUtil.EnsureLayers(RE4Layers.WeaponLayerName, RE4Layers.HitboxLayerName, RE4Layers.EnemyBodyLayerName);
                 Progress("Preparando pistolas y AK-47", 0.2f);
+                RE4ImportBuilder.BuildAll(); // casas y animales descargados
                 var db = RE4DataBuilder.Build();
                 RE4SoundBuilder.Build(db);
                 Progress("Creando el perro zombi", 0.6f);
@@ -156,7 +161,16 @@ namespace LevelSetup.RE4Tools
 
                 Progress("Actualizando la escena", 0.85f);
                 SetBoss(boss);
+                GameObject villageRoot = GameObject.Find(RE4VillageBuilder.RootName);
+                if (villageRoot != null)
+                {
+                    Progress("Control abandonado y coches en los caminos", 0.88f);
+                    RE4VillageBuilder.AddExpansion(villageRoot);
+                    BakeNavMesh(villageRoot);
+                }
                 PlaceNewItems(db);
+                PlaceExtraLoot(db);
+                PlaceAnimals();
                 AttacheCase attache = Object.FindAnyObjectByType<AttacheCase>();
                 if (attache != null)
                 {
@@ -169,6 +183,7 @@ namespace LevelSetup.RE4Tools
                 {
                     mgr.dogPrefab = dog;
                     mgr.pesetasItem = db.pesetas;
+                    mgr.ammoDrops = new List<ItemDefinition> { db.ammoHandgun, db.ammoShotgun, db.ammoSmg, db.ammoRifle, db.ammoSniper };
                     EditorUtility.SetDirty(mgr);
                 }
                 foreach (var sp in Object.FindObjectsByType<PickupSpawner>(FindObjectsSortMode.None))
@@ -190,6 +205,11 @@ namespace LevelSetup.RE4Tools
             EditorUtility.DisplayDialog("RE4 actualizado",
                 "• Pistola 92F y Pistola Resident (corredera y cargador animados)\n" +
                 "• AK-47 automático con cargador de 30\n" +
+                "• Escopeta y subfusil con modelos nuevos y rifle de francotirador (capilla vieja)\n" +
+                "• Mucha más munición: alijos en cada zona y el mercader vende balas\n" +
+                "• Casas nuevas (clásicas, de madera y la del veterano) repartidas por el pueblo\n" +
+                "• Corral con vacas y cerdos que pastan, huyen de los disparos y se pueden abatir; cadáveres de animales\n" +
+                "• Control de carretera abandonado y coches oxidados en los caminos\n" +
                 "• Mercader junto al inicio: [E] o tecla U para mejorar armas\n" +
                 "• Perros zombi en las oleadas y merodeando por el pueblo\n" +
                 "• Revólver Requiem (junto a la plaza) con tambor animado\n" +
@@ -249,7 +269,7 @@ namespace LevelSetup.RE4Tools
             {
                 RE4VillageBuilder.RootName, SystemsName, PointsName, ItemsName, RE4StoryBuilder.RootName, "Mercader",
                 "--- ENTORNO PUEBLO ---", "--- SPWAN_POINTS_HORDAS ---", "--- MUNICION DISPERSA ---", "--- HORDA DE ZOMBIES ---",
-                "Horde_Manager", "PlayerHUD_Canvas", "Horde_Canvas", "Town_Ground", "Terreno_Pueblo_Cesped",
+                "Horde_Manager", "PlayerHUD_Canvas", "Horde_Canvas", AnimalsRootName, "Town_Ground", "Terreno_Pueblo_Cesped",
             };
             foreach (var n in old) RE4EditorUtil.DestroyIfExists(n);
         }
@@ -481,7 +501,7 @@ namespace LevelSetup.RE4Tools
 
             HordeWaveManager mgr = systems.AddComponent<HordeWaveManager>();
             mgr.zombiePrefabs = enemies;
-            mgr.ammoDrops = new List<ItemDefinition> { db.ammoHandgun, db.ammoShotgun, db.ammoSmg, db.ammoRifle };
+            mgr.ammoDrops = new List<ItemDefinition> { db.ammoHandgun, db.ammoShotgun, db.ammoSmg, db.ammoRifle, db.ammoSniper };
             mgr.greenHerb = db.herbGreen;
             mgr.redHerb = db.herbRed;
             mgr.dogPrefab = dog;
@@ -571,6 +591,147 @@ namespace LevelSetup.RE4Tools
             mgr.bossPrefab = boss;
             mgr.bossName = "TYRANT";
             EditorUtility.SetDirty(mgr);
+        }
+
+        public const string AnimalsRootName = "RE4_Animales";
+
+        /// <summary>
+        /// Animales de granja (fuera de la raiz del pueblo para que no tapen la NavMesh): vacas y cerdos en el
+        /// corral, cerdos sueltos junto a la choza de Tomas, vacas pastando y algunos cadaveres por el camino.
+        /// </summary>
+        private static void PlaceAnimals()
+        {
+            GameObject old = GameObject.Find(AnimalsRootName);
+            if (old != null) Object.DestroyImmediate(old);
+            GameObject cow = AssetDatabase.LoadAssetAtPath<GameObject>(RE4ImportBuilder.CowPrefab);
+            GameObject pig = AssetDatabase.LoadAssetAtPath<GameObject>(RE4ImportBuilder.PigPrefab);
+            if (cow == null && pig == null) return;
+            GameObject root = new GameObject(AnimalsRootName);
+
+            void Spawn(GameObject prefab, Vector3 pos, float radius, bool dead)
+            {
+                if (prefab == null) return;
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                go.transform.SetParent(root.transform, true);
+                go.transform.position = Snap(pos);
+                go.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+                var fa = go.GetComponent<FarmAnimal>();
+                if (fa != null)
+                {
+                    fa.homeRadius = radius;
+                    fa.startDead = dead;
+                    EditorUtility.SetDirty(fa);
+                }
+            }
+            Vector3 Around(Vector3 c, float r)
+            {
+                Vector2 v = Random.insideUnitCircle * r;
+                return c + new Vector3(v.x, 0f, v.y);
+            }
+
+            // Corral
+            Vector3 pen = RE4VillageBuilder.PenCenter;
+            for (int i = 0; i < 3; i++) Spawn(cow, Around(pen, 4f), 5f, false);
+            for (int i = 0; i < 4; i++) Spawn(pig, Around(pen, 4.5f), 5f, false);
+            // Sueltos
+            for (int i = 0; i < 2; i++) Spawn(pig, Around(new Vector3(-104f, 0f, -18f), 3f), 8f, false);  // choza de Tomas
+            for (int i = 0; i < 2; i++) Spawn(cow, Around(new Vector3(-52f, 0f, 62f), 4f), 12f, false);    // prado de la granja
+            Spawn(cow, Around(new Vector3(120f, 0f, -14f), 3f), 10f, false);                                // camino del aserradero
+
+            // Cadaveres: algo se los ha comido
+            Vector3? cp = ZoneCenter(RE4VillageBuilder.CheckpointName);
+            if (cp.HasValue) Spawn(cow, cp.Value + new Vector3(-7f, 0f, -6f), 0f, true);
+            Spawn(cow, new Vector3(9f, 0f, 160f), 0f, true);                                                // camino del bosque
+            Vector3? chapel = ZoneCenter("Capilla_Vieja");
+            if (chapel.HasValue) Spawn(pig, chapel.Value + new Vector3(7f, 0f, -7f), 0f, true);
+            Vector3? saw = ZoneCenter("Aserradero");
+            if (saw.HasValue) Spawn(pig, saw.Value + new Vector3(-8f, 0f, 6f), 0f, true);
+        }
+
+        /// <summary>Centro de una zona del pueblo (media de sus hijos), o null si no existe en la escena.</summary>
+        private static Vector3? ZoneCenter(string name)
+        {
+            GameObject g = GameObject.Find(name);
+            if (g == null || g.transform.childCount == 0) return null;
+            Vector3 sum = Vector3.zero;
+            foreach (Transform c in g.transform) sum += c.position;
+            Vector3 p = sum / g.transform.childCount;
+            p.y = 0f;
+            return p;
+        }
+
+        /// <summary>
+        /// Rifle de francotirador y mucha mas municion repartida por todo el mapa (alijos en cada zona).
+        /// Se puede llamar varias veces: borra lo que coloco antes (objetos "Extra_").
+        /// </summary>
+        private static void PlaceExtraLoot(RE4DataBuilder.Database db)
+        {
+            GameObject root = GameObject.Find(ItemsName);
+            if (root == null) root = new GameObject(ItemsName);
+            foreach (var sp in root.GetComponentsInChildren<PickupSpawner>(true))
+                if (sp.name.StartsWith("Extra_")) Object.DestroyImmediate(sp.gameObject);
+
+            void Put(ItemDefinition item, int count, Vector3 pos)
+            {
+                if (item == null) return;
+                GameObject go = new GameObject("Extra_" + item.id);
+                go.transform.SetParent(root.transform, false);
+                go.transform.position = Snap(pos);
+                PickupSpawner s = go.AddComponent<PickupSpawner>();
+                s.item = item;
+                s.count = count;
+            }
+            // Alijo: varias cajas juntas alrededor de un punto
+            void Stash(Vector3 c, params (ItemDefinition item, int count)[] items)
+            {
+                for (int i = 0; i < items.Length; i++)
+                {
+                    float a = i * Mathf.PI * 2f / Mathf.Max(1, items.Length);
+                    Put(items[i].item, items[i].count, c + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 1.2f);
+                }
+            }
+
+            // --- Rifle de francotirador: en la capilla vieja (premio por explorar); si no existe, en la torre
+            Vector3 chapel = ZoneCenter("Capilla_Vieja") ?? new Vector3(16f, 0f, 10f);
+            Put(db.itemSniper, 1, chapel + new Vector3(2f, 0f, 2f));
+            Put(db.ammoSniper, 10, chapel + new Vector3(3.5f, 0f, 1f));
+            Put(db.ammoSniper, 5, new Vector3(-12f, 0f, 104f));          // iglesia
+            Put(db.ammoSniper, 5, new Vector3(18f, 0f, 16f));            // pie de la torre
+
+            // --- Municion a lo largo del camino y la plaza
+            Vector3[] handgun = { new Vector3(-6f, 0f, -140f), new Vector3(6f, 0f, -75f), new Vector3(-14f, 0f, -20f), new Vector3(20f, 0f, 22f),
+                                  new Vector3(-45f, 0f, 20f), new Vector3(60f, 0f, 12f), new Vector3(-10f, 0f, 75f), new Vector3(25f, 0f, 110f) };
+            foreach (var p in handgun) Put(db.ammoHandgun, 15, p);
+            Put(db.ammoShotgun, 6, new Vector3(-50f, 0f, 30f));
+            Put(db.ammoShotgun, 6, new Vector3(30f, 0f, 60f));
+            Put(db.ammoShotgun, 6, new Vector3(-20f, 0f, -60f));
+            Put(db.ammoSmg, 50, new Vector3(-30f, 0f, 60f));
+            Put(db.ammoSmg, 50, new Vector3(75f, 0f, -10f));
+            Put(db.ammoRifle, 30, new Vector3(40f, 0f, 90f));
+            Put(db.ammoMagnum, 4, new Vector3(-90f, 0f, -10f));
+            Put(db.gunpowder, 3, new Vector3(0f, 0f, -100f));
+            Put(db.gunpowder, 3, new Vector3(-35f, 0f, 45f));
+            Put(db.gunpowder, 3, new Vector3(50f, 0f, 30f));
+
+            // --- Alijos en cada zona (granja, iglesia, aserradero, bosque, capilla)
+            Stash(new Vector3(-74f, 0f, 44f), (db.ammoHandgun, 20), (db.ammoShotgun, 6), (db.herbGreen, 1));
+            Stash(new Vector3(8f, 0f, 104f), (db.ammoHandgun, 20), (db.ammoRifle, 30), (db.gunpowder, 2));
+            Vector3? saw = ZoneCenter("Aserradero");
+            if (saw.HasValue) Stash(saw.Value + new Vector3(4f, 0f, -6f), (db.ammoShotgun, 8), (db.ammoSmg, 60), (db.ammoHandgun, 20), (db.resourceS, 2));
+            Vector3? camp = ZoneCenter("Campamento_Bosque");
+            if (camp.HasValue) Stash(camp.Value + new Vector3(-4f, 0f, 4f), (db.ammoSniper, 5), (db.ammoHandgun, 25), (db.ammoShotgun, 6), (db.herbRed, 1));
+            Stash(chapel + new Vector3(-5f, 0f, -3f), (db.ammoHandgun, 20), (db.ammoMagnum, 4), (db.herbGreen, 1));
+
+            // Control abandonado: lo que dejaron los agentes desaparecidos
+            Vector3? checkpoint = ZoneCenter(RE4VillageBuilder.CheckpointName);
+            if (checkpoint.HasValue)
+            {
+                Vector3 cp = checkpoint.Value;
+                Stash(cp + new Vector3(2f, 0f, 3f), (db.ammoHandgun, 25), (db.ammoSmg, 60), (db.ammoRifle, 30), (db.spray, 1));
+                Put(db.dogtag, 1, cp + new Vector3(-3f, 0f, -2f));
+                Put(db.dogtag, 1, cp + new Vector3(5f, 0f, -4f));
+                Put(db.ammoSniper, 5, cp + new Vector3(-6f, 0f, 4f));
+            }
         }
 
         /// <summary>Revolver y su municion (se puede llamar sobre una escena ya construida).</summary>
