@@ -244,14 +244,7 @@ namespace LevelSetup.RE4Tools
             Material road = LoadOrCreateMat("Assets/Materials/Pueblo_Camino_Piedra.mat",
                 "Assets/LightingOptimizationTutorial/Textures/Environment/SmithyFloorStoneAlbedo.tif", new Color(0.6f, 0.55f, 0.48f), new Vector2(3f, 30f));
 
-            AddRoad(new Vector2(0f, -150f), new Vector2(0f, -17f), 8f, road);
-            AddRoad(new Vector2(0f, 17f), new Vector2(0f, 98f), 7f, road);
-            AddRoad(new Vector2(-17f, 0f), new Vector2(-150f, 0f), 6f, road);
-            AddRoad(new Vector2(17f, 0f), new Vector2(150f, 0f), 6f, road);
-            AddRoad(new Vector2(-20f, 0f), new Vector2(-62f, 38f), 5f, road); // hacia la granja
-            AddRoad(new Vector2(0f, 136f), new Vector2(0f, 270f), 6f, road);    // camino del bosque (norte)
-            AddRoad(new Vector2(-150f, 0f), new Vector2(-236f, 34f), 5f, road); // hacia la capilla vieja
-            AddRoad(new Vector2(150f, 0f), new Vector2(236f, -22f), 5f, road);  // hacia el aserradero
+            foreach (var d in RoadDefs) AddRoad(d.a, d.b, d.w, road);
 
             GameObject plaza = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             plaza.name = "Plaza";
@@ -561,6 +554,248 @@ namespace LevelSetup.RE4Tools
             {
                 Place(cars[i % cars.Length], _props, spots[i], R(0f, 360f), 1f, true, 0.5f);
             }
+        }
+
+        // =========================================================== Ampliacion: control abandonado y chatarra
+
+        public const string CheckpointName = "Control_Abandonado";
+        public const string WrecksName = "Chatarra_Caminos";
+        private const string CARS = "Assets/OlegWER/RustyCarsFree/Prefabs/";
+        private const string WW2 = "Assets/Low Poly Weapon Pack 4_WWII_1/Prefabs/Weapons/";
+
+        public const string NewHousesName = "Casas_Nuevas";
+        public const string PenName = "Corral_Animales";
+
+        /// <summary>Caminos del pueblo (los usa BuildRoads y la ampliacion para no construir encima).</summary>
+        private static readonly (Vector2 a, Vector2 b, float w)[] RoadDefs =
+        {
+            (new Vector2(0f, -150f), new Vector2(0f, -17f), 8f),
+            (new Vector2(0f, 17f), new Vector2(0f, 98f), 7f),
+            (new Vector2(-17f, 0f), new Vector2(-150f, 0f), 6f),
+            (new Vector2(17f, 0f), new Vector2(150f, 0f), 6f),
+            (new Vector2(-20f, 0f), new Vector2(-62f, 38f), 5f),    // hacia la granja
+            (new Vector2(0f, 136f), new Vector2(0f, 270f), 6f),     // camino del bosque (norte)
+            (new Vector2(-150f, 0f), new Vector2(-236f, 34f), 5f),  // hacia la capilla vieja
+            (new Vector2(150f, 0f), new Vector2(236f, -22f), 5f),   // hacia el aserradero
+        };
+
+        /// <summary>Centro del corral creado por la ultima ampliacion (para soltar ahi a los animales).</summary>
+        public static Vector3 PenCenter { get; private set; } = new Vector3(-80f, 0f, 22f);
+
+        /// <summary>
+        /// Añade la ampliacion sobre un pueblo ya construido (o recien construido): control de carretera
+        /// abandonado, coches oxidados, las casas importadas repartidas por el pueblo y el corral de la granja.
+        /// Se puede repetir: borra lo que creo antes.
+        /// </summary>
+        public static void AddExpansion(GameObject villageRoot)
+        {
+            if (villageRoot == null) return;
+            _root = villageRoot.transform;
+            _rng = new System.Random(2024);
+            foreach (string n in new[] { CheckpointName, WrecksName, NewHousesName, PenName })
+            {
+                Transform old = _root.Find(n);
+                if (old != null) Object.DestroyImmediate(old.gameObject);
+            }
+
+            // Lo que ya hay en la escena (para no construir encima de casas, arboles ni caminos)
+            Occupied.Clear();
+            Roads.Clear();
+            foreach (var d in RoadDefs) Roads.Add(new Road { a = d.a, b = d.b, width = d.w });
+            ScanOccupancy(_root);
+
+            var built = new List<GameObject>
+            {
+                BuildCheckpoint(null),
+                BuildRoadWrecks(),
+                BuildPen(),
+                BuildImportedHouses(),
+            };
+            foreach (var g in built)
+            {
+                if (g == null) continue;
+                EnsureColliders(g);
+                MarkStatic(g);
+            }
+        }
+
+        /// <summary>Recoge los limites de cada objeto ya colocado (no el suelo, caminos ni la montaña).</summary>
+        private static void ScanOccupancy(Transform root)
+        {
+            foreach (Transform group in root)
+            {
+                if (group.GetComponent<Renderer>() != null) continue; // suelo, caminos, plaza
+                foreach (Transform child in group)
+                {
+                    Bounds b = RE4EditorUtil.WorldBounds(child.gameObject);
+                    if (b.size.sqrMagnitude < 0.01f || b.size.x > 70f || b.size.z > 70f) continue;
+                    Occupied.Add(b);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Casas descargadas (clasicas, de madera y la del veterano) repartidas por las afueras y junto a
+        /// los caminos, mirando hacia el camino o el centro. Algunas con luz en la puerta.
+        /// </summary>
+        private static GameObject BuildImportedHouses()
+        {
+            List<string> houses = RE4ImportBuilder.HousePrefabs();
+            if (houses.Count == 0) return null;
+            Transform zone = Group(NewHousesName);
+            int placed = 0;
+            int target = Mathf.Clamp(houses.Count * 3, 8, 18);
+
+            // Primero junto a los caminos (mas visibles), luego dispersas
+            foreach (var road in new List<Road>(Roads))
+            {
+                Vector2 dir = (road.b - road.a).normalized;
+                Vector2 normal = new Vector2(-dir.y, dir.x);
+                float len = Vector2.Distance(road.a, road.b);
+                for (float d = 18f; d < len - 8f && placed < target; d += R(30f, 45f))
+                {
+                    int side = _rng.NextDouble() < 0.5 ? -1 : 1;
+                    Vector2 p2 = road.a + dir * d + normal * side * (road.width * 0.5f + R(12f, 16f));
+                    Vector3 p = new Vector3(p2.x, 0f, p2.y);
+                    float yaw = Mathf.Atan2(-normal.x * side, -normal.y * side) * Mathf.Rad2Deg;
+                    if (TryImportedHouse(zone, houses[placed % houses.Count], p, yaw)) placed++;
+                }
+            }
+            for (int i = 0; i < 160 && placed < target + 6; i++)
+            {
+                float a = R(0f, Mathf.PI * 2f);
+                float radius = R(50f, 210f);
+                Vector3 p = new Vector3(Mathf.Cos(a) * radius, 0f, Mathf.Sin(a) * radius);
+                if (!InsideWorld(p, 22f)) continue;
+                float yaw = Mathf.Atan2(-p.x, -p.z) * Mathf.Rad2Deg + R(-25f, 25f);
+                if (TryImportedHouse(zone, houses[placed % houses.Count], p, yaw)) placed++;
+            }
+            Debug.Log($"[RE4] Casas importadas colocadas: {placed}");
+            return zone.gameObject;
+        }
+
+        private static bool TryImportedHouse(Transform zone, string path, Vector3 p, float yaw)
+        {
+            GameObject h = Place(path, zone, p, yaw, 1f, true, 2f);
+            if (h == null) h = Place(path, zone, p, yaw + 90f, 1f, true, 2f);
+            if (h == null) return false;
+            if (_rng.NextDouble() < 0.4)
+            {
+                Bounds b = RE4EditorUtil.WorldBounds(h);
+                Vector3 front = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
+                AddLight(zone, new Vector3(b.center.x, 2.4f, b.center.z) + front * (Mathf.Max(b.extents.x, b.extents.z) + 0.4f),
+                    new Color(1f, 0.6f, 0.3f), 8f, 1.2f);
+            }
+            return true;
+        }
+
+        /// <summary>Corral de la granja: valla con una entrada y un abrevadero. Los animales los pone RE4Setup.</summary>
+        private static GameObject BuildPen()
+        {
+            Transform zone = Group(PenName);
+            Vector3 farm = new Vector3(-80f, 0f, 48f);
+            // buscar un hueco libre de 18x18 m junto a la granja
+            Vector3 c = farm + new Vector3(0f, 0f, -26f);
+            float[] angles = { 270f, 200f, 330f, 160f, 20f, 110f };
+            foreach (float ang in angles)
+            {
+                for (float dist = 24f; dist <= 40f; dist += 8f)
+                {
+                    Vector3 p = farm + Quaternion.Euler(0f, ang, 0f) * Vector3.forward * dist;
+                    var test = new Bounds(p, new Vector3(20f, 4f, 20f));
+                    if (!Overlaps(test) && InsideWorld(p, 15f)) { c = p; goto found; }
+                }
+            }
+            found:
+            PenCenter = c;
+
+            const float half = 8f;
+            const string fence = LOT + "Props/FenceDouble.prefab";
+            // 4 lados, con hueco en el lado sur
+            for (float x = -half + 2f; x <= half - 2f; x += 4f)
+            {
+                Place(fence, zone, c + new Vector3(x, 0f, half), 0f, 1f, false);
+                if (Mathf.Abs(x) > 3f) Place(fence, zone, c + new Vector3(x, 0f, -half), 0f, 1f, false);
+            }
+            for (float z = -half + 2f; z <= half - 2f; z += 4f)
+            {
+                Place(fence, zone, c + new Vector3(half, 0f, z), 90f, 1f, false);
+                Place(fence, zone, c + new Vector3(-half, 0f, z), 90f, 1f, false);
+            }
+            Place(FORGE + "FantasyExteriors/Village & Towns/Prefabs/Buildings/Farm/Troughs/fi_vil_farm_trough02_2m.prefab", zone, c + new Vector3(-4f, 0f, 5f), 0f, 1f, false);
+            Place(LOT + "Props/Buckets.prefab", zone, c + new Vector3(5f, 0f, 5.5f), 0f, 1f, false);
+            Place(LOT + "Props/WallLogs.prefab", zone, c + new Vector3(10.5f, 0f, 0f), 0f, 1f, false);
+            AddLight(zone, c + new Vector3(0f, 2.6f, -half - 0.5f), new Color(1f, 0.6f, 0.28f), 14f, 1.5f);
+            Occupied.Add(new Bounds(c, new Vector3(2f * half + 2f, 4f, 2f * half + 2f)));
+            return zone.gameObject;
+        }
+
+        /// <summary>
+        /// Control de carretera abandonado en el camino de la capilla: aqui se perdio el rastro de los dos agentes
+        /// que entraron antes que Leon. Coches cruzados, barricada, barracon, armas tiradas y una bengala roja.
+        /// </summary>
+        private static GameObject BuildCheckpoint(Result res)
+        {
+            Transform zone = Group(CheckpointName);
+            Vector3 c = new Vector3(-185f, 0f, 14f);
+            float yaw = Mathf.Atan2(-86f, 34f) * Mathf.Rad2Deg; // direccion del camino
+            Quaternion q = Quaternion.Euler(0f, yaw, 0f);
+            Vector3 P(float x, float z) => c + q * new Vector3(x, 0f, z);
+
+            Place(CARS + "SM_asset_03.prefab", zone, P(-2.4f, 0f), yaw + 78f, 1f, false);
+            Place(CARS + "SM_asset_04.prefab", zone, P(2.8f, 4.5f), yaw - 64f, 1f, false);
+            Place(LOT + "Props/WallLogs.prefab", zone, P(-1f, -7f), yaw + 90f, 1f, false);
+            Place(LOT + "Props/Barrels01.prefab", zone, P(-5.5f, -3f), yaw + 20f, 1f, false);
+            Place(LOT + "Props/Barrels02.prefab", zone, P(6f, -1f), yaw - 30f, 1f, false);
+            Place(LOT + "Props/FenceDouble.prefab", zone, P(-6.5f, 7f), yaw, 1f, false);
+            Place(LOT + "Props/FenceDouble.prefab", zone, P(7f, 8f), yaw + 12f, 1f, false);
+            Place(LOT + "Environment/BarracksSingle.prefab", zone, P(-13f, 3f), yaw + 90f, 1f, false);
+            Place(LOT + "Environment/Storage.prefab", zone, P(13f, -5f), yaw - 90f, 1f, false);
+            Place(LOT + "Props/Plank01.prefab", zone, P(3f, -4f), yaw + 40f, 1f, false);
+            Place(LOT + "Props/Shovel01.prefab", zone, P(-3.5f, -5f), yaw + 110f, 1f, false);
+            Place(LOT + "Props/Bucket.prefab", zone, P(5f, -6f), 0f, 1f, false);
+            Place(LOT + "Props/TorchPole.prefab", zone, P(4.5f, -7.5f), 0f, 1f, false);
+
+            // Armas abandonadas en el suelo (solo decorado), tumbadas de lado
+            GameObject lmg = Place(WW2 + "WWII_LMG_A.prefab", zone, P(1.2f, -3.5f), yaw + 35f, 1f, false);
+            GameObject ar = Place(WW2 + "WWII_AR_A.prefab", zone, P(-9.5f, 1f), yaw - 70f, 1f, false);
+            foreach (var gun in new[] { lmg, ar })
+            {
+                if (gun == null) continue;
+                gun.transform.rotation *= Quaternion.Euler(0f, 0f, 90f);
+                Bounds gb = RE4EditorUtil.WorldBounds(gun);
+                gun.transform.position += Vector3.up * (c.y + 0.01f - gb.min.y);
+            }
+
+            // Antorcha y bengala roja de emergencia junto a los coches
+            AddLight(zone, P(4.5f, -7.5f) + Vector3.up * 2.4f, new Color(1f, 0.55f, 0.22f), 12f, 1.6f);
+            AddLight(zone, P(0.5f, 2f) + Vector3.up * 0.3f, new Color(1f, 0.12f, 0.08f), 9f, 2.2f);
+
+            Occupied.Add(new Bounds(c, new Vector3(34f, 8f, 26f)));
+            if (res != null)
+            {
+                res.villagerPoints.Add(P(-8f, -10f));
+                res.villagerPoints.Add(P(9f, 10f));
+            }
+            return zone.gameObject;
+        }
+
+        /// <summary>Coches oxidados abandonados en los caminos (sobre el propio camino, lejos de las casas).</summary>
+        private static GameObject BuildRoadWrecks()
+        {
+            Transform zone = Group(WrecksName);
+            (string car, Vector3 pos, float yaw)[] wrecks =
+            {
+                ("SM_asset_03.prefab", new Vector3(2.6f, 0f, -60f), 12f),
+                ("SM_asset_04.prefab", new Vector3(-2.6f, 0f, 48f), 172f),
+                ("SM_asset_00.prefab", new Vector3(60f, 0f, -2.4f), 96f),
+                ("SM_asset_01.prefab", new Vector3(-2.4f, 0f, 168f), 200f),
+                ("SM_asset_03.prefab", new Vector3(2.4f, 0f, 232f), 8f),
+                ("SM_asset_02.prefab", new Vector3(200f, 0f, -10.5f), 104f),
+                ("SM_asset_04.prefab", new Vector3(-96f, 0f, 2.4f), 260f),
+            };
+            foreach (var w in wrecks) Place(CARS + w.car, zone, w.pos, w.yaw, 1f, false);
+            return zone.gameObject;
         }
 
         private static void BuildTorches()

@@ -16,7 +16,7 @@ namespace LevelSetup.RE4Tools
         {
             public GameObject spray;
             public GameObject herbGreen, herbRed, herbGG, herbGR;
-            public GameObject ammoHandgun, ammoShotgun, ammoSmg, ammoRifle, ammoMagnum;
+            public GameObject ammoHandgun, ammoShotgun, ammoSmg, ammoRifle, ammoMagnum, ammoSniper;
         }
 
         public static Props Build()
@@ -35,6 +35,7 @@ namespace LevelSetup.RE4Tools
             p.ammoSmg = Safe(() => BuildAmmo("Municion_Subfusil", new Color(0.6f, 0.75f, 1f)));
             p.ammoRifle = Safe(() => BuildAmmo("Municion_Rifle", new Color(0.7f, 0.9f, 0.6f)));
             p.ammoMagnum = Safe(() => BuildAmmo("Municion_Magnum", new Color(1f, 0.85f, 0.45f)));
+            p.ammoSniper = Safe(() => BuildAmmo("Municion_Francotirador", new Color(0.8f, 0.7f, 0.55f)));
             AssetDatabase.SaveAssets();
             return p;
         }
