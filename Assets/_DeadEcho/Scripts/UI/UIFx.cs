@@ -85,7 +85,8 @@ namespace DeadEcho.UI
             RectTransform rt = Rect(parent, name);
             var t = rt.gameObject.AddComponent<TextMeshProUGUI>();
             if (font != null) t.font = font;
-            t.text = text;
+            t.text = Loc.T(text);
+            LocText.Attach(t, text); // los textos fijos cambian de idioma en vivo
             t.fontSize = size;
             t.color = color;
             t.alignment = align;
