@@ -64,8 +64,53 @@ namespace Gameplay.RE4
 
         private void Start()
         {
+            LoadModel();
             // la primera frase lista de antemano para que suene al instante
             NpcVoice.Get().Prefetch(greeting, voiceName);
+        }
+
+        // ------------------------------------------------------------ Modelo descargado
+
+        [Header("Modelo (Resources)")]
+        [Tooltip("Modelo en Resources que sustituye al cuerpo de la escena. Vacio en Tomas = RE4Modelos/Tomas/Tomas.")]
+        public string modelResource = "";
+        public float modelYaw = 0f;
+        public float modelScale = 0.97f;
+
+        /// <summary>
+        /// Pone el modelo descargado (malla estatica con los brazos ya bajados, pies en el suelo)
+        /// y oculta el cuerpo antiguo. Si no existe, se queda el que hubiera en la escena.
+        /// </summary>
+        private void LoadModel()
+        {
+            string res = modelResource;
+            if (string.IsNullOrEmpty(res) && npcId == "tomas") res = "RE4Modelos/Tomas/Tomas";
+            if (string.IsNullOrEmpty(res)) return;
+            GameObject prefab = Resources.Load<GameObject>(res);
+            if (prefab == null) return;
+
+            foreach (Renderer old in GetComponentsInChildren<Renderer>())
+                if (old.GetComponent<Light>() == null) old.enabled = false;
+
+            GameObject model = Instantiate(prefab, transform);
+            model.name = "Modelo_" + npcId;
+            model.transform.localPosition = Vector3.zero;
+            model.transform.localRotation = Quaternion.Euler(0f, modelYaw, 0f);
+            model.transform.localScale = Vector3.one * modelScale;
+            foreach (Collider c in model.GetComponentsInChildren<Collider>()) Destroy(c);
+
+            Material mat = new Material(Shader.Find("Standard")) { name = "Modelo_" + npcId };
+            Texture2D color = Resources.Load<Texture2D>(res + "_Color");
+            if (color != null) mat.mainTexture = color;
+            mat.SetFloat("_Glossiness", 0.15f);
+            mat.SetFloat("_Metallic", 0f);
+            foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
+            {
+                var mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++) mats[i] = mat;
+                r.sharedMaterials = mats;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            }
         }
 
         private void OnEnable() => All.Add(this);
