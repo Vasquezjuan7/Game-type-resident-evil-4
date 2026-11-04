@@ -12,6 +12,8 @@ namespace Gameplay.RE4
 
         private Light _light;
         private float _seed;
+        private float _gust;
+        private float _nextGust;
 
         private void Awake()
         {
@@ -22,8 +24,16 @@ namespace Gameplay.RE4
         private void Update()
         {
             float n = Mathf.PerlinNoise(_seed, Time.time * speed) - 0.5f;
-            _light.intensity = baseIntensity * (1f + n * amount * 2f);
-        }
+            // Rachas de viento: de vez en cuando la llama casi se apaga y se recupera
+            if (Time.time >= _nextGust)
+            {
+                _nextGust = Time.time + Random.Range(6f, 22f);
+                _gust = Random.Range(0.45f, 0.75f);
+            }
+            _gust = Mathf.MoveTowards(_gust, 0f, Time.deltaTime * 1.4f);
+            float gutter = 1f - _gust * Mathf.PerlinNoise(_seed + 7f, Time.time * 18f);
+            _light.intensity = baseIntensity * (1f + n * amount * 2f) * gutter;
+        }
 
         /// <summary>Permite actualizar la intensidad base de la antorcha u hoguera en tiempo de ejecución.</summary>
         public void SetBaseIntensity(float newIntensity)
